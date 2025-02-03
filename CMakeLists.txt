@@ -7,7 +7,6 @@ project(DashBeamApp LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 
-# Ensure Qt 6.2 or higher is found, including QtConcurrent
 find_package(Qt6 6.2 REQUIRED COMPONENTS Core Gui Qml Quick Concurrent)
 
 if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
@@ -17,14 +16,13 @@ endif()
 qt_add_executable(DashBeamApp src/main.cpp
     src/UdpListener.h
     src/UdpListener.cpp
-
 )
 
 qt_add_resources(DashBeamApp "configuration"
     PREFIX "/"
     FILES
         qtquickcontrols2.conf
-
+        assets/Aldrich-Regular.ttf
 )
 
 target_link_libraries(DashBeamApp PRIVATE
@@ -58,6 +56,13 @@ install(TARGETS DashBeamApp
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-# make IDEs aware of the QML import path
-set(QML_IMPORT_PATH ${PROJECT_BINARY_DIR}/qml CACHE PATH
-    "Path to the custom QML components defined by the project")
+# Ensure correct Android settings
+qt_policy(SET QTP0001 NEW)
+
+# Fix ABI detection issue
+set(QT_ANDROID_ABIS "arm64-v8a")  # Add "armeabi-v7a;x86;x86_64" for more
+set(CMAKE_TOOLCHAIN_FILE "$ENV{ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake")
+set(CMAKE_ANDROID_STL_TYPE "c++_shared")
+
+# Finalize Qt Android build
+qt_finalize_executable(DashBeamApp)

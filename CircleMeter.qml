@@ -2,18 +2,24 @@ import QtQuick
 import QtQuick.Effects
 
 Item {
+    // Avoid adding or subtracting absolute pixel values to help with scalability.
+    // Better to be in terms of radius or other scalable properties.
     id: dial
     property int tickCount: 19 // Numbers of ticks visible
     property int tickDivide: 24 // How many ticks to divide by (like a pie)
     property real tickStep: 500 // Value change between every tick
     property int labelSkipEvery: 2 // Skip labelling every nth tick
+    property int labelFontSize: radius/12 // Font size of labels
+    property int longTickLength: radius/8 // Pixel value of long ticks
+    property int shortTickLength: radius/16 // Pixel value of short ticks
+    property int longTickEvery: 2 // Longer tick line every n
     property int radius: 150
     property color backgroundColor: "#2f2f2f"
     property color strokeColor: "#FFFFFF"
     property color tickColor: "#FFFFFF"
     property color needleColor: "red"
     property real needleValue: 0
-    property real startAngle: 180;
+    property real startAngle: 180
 
     property real ghostRotation: 0
 
@@ -29,14 +35,14 @@ Item {
             ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
             ctx.fillStyle = backgroundColor;
             ctx.fill();
-            ctx.lineWidth = 3;
+            ctx.lineWidth = radius/50;
             ctx.strokeStyle = strokeColor;
             ctx.stroke();
 
             // Draw the alternating long and short ticks
             for (var i = 0; i < tickCount; i++) {
                 var angle = (startAngle*(Math.PI/180)) - (Math.PI/2) + (Math.PI * 2 / tickDivide) * i;
-                var tickLength = (i % labelSkipEvery === 0) ? 20 : 10;
+                var tickLength = (i % longTickEvery === 0) ? longTickLength : shortTickLength;
                 var startX = width / 2 + Math.cos(angle) * (radius - tickLength);
                 var startY = height / 2 + Math.sin(angle) * (radius - tickLength);
                 var endX = width / 2 + Math.cos(angle) * radius;
@@ -45,19 +51,20 @@ Item {
                 ctx.beginPath();
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(endX, endY);
-                ctx.lineWidth = 2;
+                ctx.lineWidth = radius/75;
                 ctx.strokeStyle = tickColor;
                 ctx.stroke();
 
                 // Draw labels
                 if (i%labelSkipEvery==0){
-                var labelX = width / 2 + Math.cos(angle) * (radius - 30);
-                var labelY = height / 2 + Math.sin(angle) * (radius - 30);
-                ctx.font = "bold 12px Roboto";
+                var labelX = width / 2 + Math.cos(angle) * (radius - longTickLength - labelFontSize);
+                var labelY = height / 2 + Math.sin(angle) * (radius - longTickLength - labelFontSize);
+                ctx.font = "bold " + labelFontSize +"px sans-serif";
                 ctx.fillStyle = tickColor;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText(i * tickStep, labelX, labelY);}
+
             }
         }
 
@@ -66,7 +73,7 @@ Item {
         id: needle
         smooth: true
         width: 4
-        height: dial.radius - 25
+        height: dial.radius * 0.85
         color: needleColor
         anchors.horizontalCenter: background.horizontalCenter
         anchors.bottom: background.verticalCenter
@@ -83,6 +90,24 @@ Item {
         anchors.bottom: background.verticalCenter
         transformOrigin: Item.Bottom
         rotation: dial.ghostRotation
+    }
+    Canvas {
+        id: middleSection
+        width: parent.width
+        height: parent.height
+        onPaint: {
+            var ctx = getContext("2d");
+            // Draw the circular midsection
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, radius * 0.7 - longTickLength, 0, Math.PI * 2);
+            ctx.fillStyle = backgroundColor;
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = strokeColor;
+            ctx.stroke();
+
+        }
+
     }
     Timer {
         interval: 16 // Update every 50ms
