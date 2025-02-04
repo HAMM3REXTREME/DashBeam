@@ -72,7 +72,7 @@ Item {
     Rectangle {
         id: needle
         smooth: true
-        width: 4
+        width: dial.radius/40
         height: dial.radius * 0.85
         color: needleColor
         anchors.horizontalCenter: background.horizontalCenter
