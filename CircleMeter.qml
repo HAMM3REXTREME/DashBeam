@@ -14,13 +14,15 @@ Item {
     property int shortTickLength: radius/16 // Pixel value of short ticks
     property int longTickEvery: 2 // Longer tick line every n
     property int radius: 150
-    property color backgroundColorInner: "#292929"
+    property color backgroundColorInner: "#242424"
     property color backgroundColorOuter: "#2F2F2F"
     property color strokeColor: "#FFFFFF"
     property color tickColor: "#FFFFFF"
+    property color tickColorRedline: "#FF0000"
     property color needleColor: "red"
     property real needleValue: 0
     property real startAngle: 180
+    property real redline: 9999.9
 
     property real ghostRotation: 0
 
@@ -49,14 +51,14 @@ Item {
                 var tickLength = (i % longTickEvery === 0) ? longTickLength : shortTickLength;
                 var startX = width / 2 + Math.cos(angle) * (radius - tickLength);
                 var startY = height / 2 + Math.sin(angle) * (radius - tickLength);
-                var endX = width / 2 + Math.cos(angle) * radius;
-                var endY = height / 2 + Math.sin(angle) * radius;
+                var endX = width / 2 + Math.cos(angle) * (0.98*radius);
+                var endY = height / 2 + Math.sin(angle) * (0.98*radius);
 
                 ctx.beginPath();
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(endX, endY);
                 ctx.lineWidth = radius/75;
-                ctx.strokeStyle = tickColor;
+                ctx.strokeStyle = (i * tickStep) < redline ? tickColor : tickColorRedline;
                 ctx.stroke();
 
                 // Draw labels
@@ -73,6 +75,7 @@ Item {
         }
 
     }
+
     Rectangle {
         id: needle
         smooth: true
@@ -95,6 +98,7 @@ Item {
         transformOrigin: Item.Bottom
         rotation: dial.ghostRotation
     }
+
     Canvas {
         id: middleSection
         width: parent.width
@@ -113,6 +117,7 @@ Item {
         }
 
     }
+
     Timer {
         interval: 16 // Update every 50ms
         running: true
@@ -120,6 +125,16 @@ Item {
         onTriggered: {
             // Smoothly interpolate the ghost rotation to follow the needle with a delay
             dial.ghostRotation = dial.ghostRotation + (needle.rotation - dial.ghostRotation) * 0.3;
+        }
+    }
+
+    Connections {
+        target: dial
+        onBackgroundColorInnerChanged: {
+            background.requestPaint();
+        }
+        onBackgroundColorOuterChanged: {
+            background.requestPaint();
         }
     }
 

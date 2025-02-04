@@ -1,9 +1,10 @@
 #include "UdpListener.h"
-#include <QDebug>
-#include <QHostAddress>
+
 #include <QByteArray>
-#include <cstring>
+#include <QDebug>
 #include <QHash>
+#include <QHostAddress>
+#include <cstring>
 
 // Temporary structure to represent the OutGaugePacket
 struct OutGaugePacket {
@@ -29,7 +30,6 @@ struct OutGaugePacket {
     int id;
 };
 
-
 // Function to check which flags are active using QHash
 QStringList readFlags(int value, const QHash<int, QString>& flags) {
     QStringList active_flags;
@@ -44,15 +44,12 @@ QStringList readFlags(int value, const QHash<int, QString>& flags) {
     return active_flags;
 }
 
-UdpListener::UdpListener(quint16 port,const QHash<int, QString>& ogFlags, const QHash<int, QString>& dlFlags, QObject *parent)
-    : QObject(parent), m_socket(new QUdpSocket(this)), m_port(port), m_ogFlags(ogFlags) ,m_dlFlags(dlFlags)
-{
+UdpListener::UdpListener(quint16 port, const QHash<int, QString>& ogFlags, const QHash<int, QString>& dlFlags, QObject* parent) : QObject(parent), m_socket(new QUdpSocket(this)), m_port(port), m_ogFlags(ogFlags), m_dlFlags(dlFlags) {
     // Connect the socket to the readyRead signal to process datagrams
     connect(m_socket, &QUdpSocket::readyRead, this, &UdpListener::processDatagrams);
 }
 
-void UdpListener::start()
-{
+void UdpListener::start() {
     // Bind the socket to the provided port
     if (!m_socket->bind(QHostAddress::Any, m_port)) {
         qWarning() << "Failed to bind UDP socket on port" << m_port;
@@ -60,7 +57,6 @@ void UdpListener::start()
         qDebug() << "UDP listener started on port" << m_port;
     }
 }
-
 
 void UdpListener::setPort(quint16 newPort) {
     qDebug() << "Changing ports...";
@@ -70,11 +66,10 @@ void UdpListener::setPort(quint16 newPort) {
     }
 
     m_port = newPort;
-    start(); // Restart with the new port
+    start();  // Restart with the new port
 }
 
-void UdpListener::processDatagrams()
-{
+void UdpListener::processDatagrams() {
     while (m_socket->hasPendingDatagrams()) {
         QByteArray datagram;
         datagram.resize(int(m_socket->pendingDatagramSize()));
