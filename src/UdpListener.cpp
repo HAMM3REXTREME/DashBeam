@@ -3,6 +3,7 @@
 #include <QHostAddress>
 #include <QByteArray>
 #include <cstring>
+#include <QHash>
 
 // Temporary structure to represent the OutGaugePacket
 struct OutGaugePacket {
@@ -28,8 +29,23 @@ struct OutGaugePacket {
     int id;
 };
 
-UdpListener::UdpListener(quint16 port, QObject *parent)
-    : QObject(parent), m_socket(new QUdpSocket(this)), m_port(port)
+
+// Function to check which flags are active using QHash
+QStringList readFlags(int value, const QHash<int, QString>& flags) {
+    QStringList active_flags;
+
+    // Iterate through the hash and check which flags are set
+    for (auto it = flags.constBegin(); it != flags.constEnd(); ++it) {
+        if (value & it.key()) {
+            active_flags.append(it.value());
+        }
+    }
+
+    return active_flags;
+}
+
+UdpListener::UdpListener(quint16 port,const QHash<int, QString>& ogFlags, const QHash<int, QString>& dlFlags, QObject *parent)
+    : QObject(parent), m_socket(new QUdpSocket(this)), m_port(port), m_ogFlags(ogFlags) ,m_dlFlags(dlFlags)
 {
     // Connect the socket to the readyRead signal to process datagrams
     connect(m_socket, &QUdpSocket::readyRead, this, &UdpListener::processDatagrams);
@@ -43,6 +59,18 @@ void UdpListener::start()
     } else {
         qDebug() << "UDP listener started on port" << m_port;
     }
+}
+
+
+void UdpListener::setPort(quint16 newPort) {
+    qDebug() << "Changing ports...";
+    if (m_socket->state() == QAbstractSocket::BoundState) {
+        // If already listening on a port, stop first
+        m_socket->close();
+    }
+
+    m_port = newPort;
+    start(); // Restart with the new port
 }
 
 void UdpListener::processDatagrams()
@@ -69,6 +97,15 @@ void UdpListener::processDatagrams()
             data["speed"] = packet.speed;
             data["throttle"] = packet.throttle;
             data["turbo"] = packet.turbo;
+            data["gear"] = packet.gear;
+            data["fuel"] = packet.fuel;
+            // Read the OG_flags from the packet and check active ones using QHash
+            QStringList active_ogFlags = readFlags(packet.flags, m_ogFlags);
+            data["flags"] = active_ogFlags;
+            // ALL dash lights
+            data["dashLights"] = readFlags(packet.dashLights, m_dlFlags);
+            // SHOWN dash lights
+            data["showLights"] = readFlags(packet.showLights, m_dlFlags);
 
             // Emit the signal with the QVariantMap containing the data
             emit outGaugeUpdated(data);

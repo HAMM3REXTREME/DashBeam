@@ -11,10 +11,11 @@ class UdpListener : public QObject
     Q_OBJECT
 
 public:
-    explicit UdpListener(quint16 port, QObject *parent = nullptr);
-
+    explicit UdpListener(quint16 port, const QHash<int, QString>& ogFlags, const QHash<int, QString>& dlFlags, QObject *parent = nullptr);
     // Start listening for UDP datagrams
     void start();
+public slots:
+    void setPort(quint16 newPort);
 
 signals:
     // Signal to pass the data to QML as QVariantMap
@@ -27,6 +28,8 @@ private slots:
 private:
     QUdpSocket *m_socket;  // Socket for UDP communication
     quint16 m_port;        // Port to listen to
+    QHash<int, QString> m_ogFlags;
+    QHash<int, QString> m_dlFlags;
 };
 
 #endif // UDP_LISTENER_H

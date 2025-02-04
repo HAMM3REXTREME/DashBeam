@@ -15,6 +15,7 @@ ApplicationWindow {
         color: "#191919"
         anchors.centerIn: parent
 
+        // Central display
         Rectangle {
             id: centerBox
             width: parent.width * 0.3
@@ -46,7 +47,6 @@ ApplicationWindow {
         }
     }
 
-
         // RPM Gauge (Left)
         CircleMeter {
         id: tacho
@@ -59,11 +59,11 @@ ApplicationWindow {
         tickStep: 0.5/5
         tickCount: 91
         tickDivide: 120
-        longTickEvery: 5;
-        labelSkipEvery: 10;
+        longTickEvery: 5
+        labelSkipEvery: 10
         needleValue: rpmValue/1000
-        tickColor: "orange"
-        strokeColor: "orange"
+        tickColor: "#FE8000"
+        strokeColor: "#FE8000"
         }
 
         // Speed Gauge (Right)
@@ -80,19 +80,40 @@ ApplicationWindow {
         tickCount: 151 // 75% + 1 for 3/4 quarters
         tickDivide: 200
         startAngle: 270
-        tickColor: "orange"
-        strokeColor: "orange"
+        tickColor: "#FE8000"
+        strokeColor: "#FE8000"
         labelSkipEvery: 10
         longTickEvery: 5
         }
 
+        TextField {
+            id: portInput
+            placeholderText: "4444"
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
+            width: 75
 
+        }
+
+        Button {
+            text: "Start Listening"
+            anchors.right: parent.right
+            onClicked: {
+                var port = parseInt(portInput.text);
+                if (port && port > 0 && port <= 65535) {
+                    udpListener.setPort(port);
+                } else {
+                    console.log("Invalid port number.");
+                }
+            }
+        }
 
     property real rpmValue: 0.0
     property real speedValue: 0.0
     property real throttleValue: 0.0
     property real turboValue: 0.0
-    // Connect to C++ signal for full packet
+    property var ogFlags: []
+
+    // Connect to C++ signal for a packet
     Connections {
         target: udpListener
         onOutGaugeUpdated: function(data) {
@@ -100,6 +121,7 @@ ApplicationWindow {
             speedValue = data.speed * 3.6  // Converting speed from m/s to km/h
             throttleValue = data.throttle * 100
             turboValue = data.turbo
+            ogFlags = data.flags
         }
     }
 }

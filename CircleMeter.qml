@@ -14,7 +14,8 @@ Item {
     property int shortTickLength: radius/16 // Pixel value of short ticks
     property int longTickEvery: 2 // Longer tick line every n
     property int radius: 150
-    property color backgroundColor: "#2f2f2f"
+    property color backgroundColorInner: "#292929"
+    property color backgroundColorOuter: "#2F2F2F"
     property color strokeColor: "#FFFFFF"
     property color tickColor: "#FFFFFF"
     property color needleColor: "red"
@@ -29,11 +30,14 @@ Item {
         height: parent.height
         onPaint: {
             var ctx = getContext("2d");
-
+            // Gradient
+            var grad = ctx.createRadialGradient(width / 2, height / 2, radius * 0.7, width / 2, height / 2, radius);
+            grad.addColorStop(0, backgroundColorInner);
+            grad.addColorStop(1, backgroundColorOuter);
             // Draw the circular background
             ctx.beginPath();
             ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
-            ctx.fillStyle = backgroundColor;
+            ctx.fillStyle = grad;
             ctx.fill();
             ctx.lineWidth = radius/50;
             ctx.strokeStyle = strokeColor;
@@ -85,7 +89,7 @@ Item {
         anchors.fill: needle
         blurEnabled: true
         blurMax: 64
-        blur: 0.3
+        blur: 0.8
         anchors.horizontalCenter: background.horizontalCenter
         anchors.bottom: background.verticalCenter
         transformOrigin: Item.Bottom
@@ -100,7 +104,7 @@ Item {
             // Draw the circular midsection
             ctx.beginPath();
             ctx.arc(width / 2, height / 2, radius * 0.7 - longTickLength, 0, Math.PI * 2);
-            ctx.fillStyle = backgroundColor;
+            ctx.fillStyle = backgroundColorOuter; // Outer color for contrast
             ctx.fill();
             ctx.lineWidth = 1;
             ctx.strokeStyle = strokeColor;
