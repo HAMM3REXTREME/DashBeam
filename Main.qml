@@ -7,7 +7,9 @@ ApplicationWindow {
     visible: true
     width: 1280
     height: 720
-    title: "Car Dashboard"
+    title: "DashBeam - BeamNG dashboard"
+
+    Material.theme: Material.Dark
 
     Rectangle {
         width: parent.width
@@ -31,10 +33,10 @@ ApplicationWindow {
             }
             Text {
                 anchors.centerIn: parent
-                text: "Speed: " + speedValue.toFixed(
-                          1) + " km/h\nThrottle: " + throttleValue.toFixed(
-                          0) + "%\nTurbo: " + turboValue.toFixed(
-                          1) + ((clShiftPoint <= rpmValue) ? "\nSHIFT" : "")
+                text: "Speed: " + vSpeed.toFixed(
+                          1) + " km/h\nThrottle: " + (100*vThrottle).toFixed(
+                          0) + "%\nTurbo: " + vTurbo.toFixed(
+                          1) + ((clShiftPoint <= vRpm) ? "\nSHIFT" : "")
                 color: "white"
                 font.pixelSize: 16
                 font.family: uiFont.name
@@ -44,7 +46,7 @@ ApplicationWindow {
             Rectangle {
                 id: throttleBar
                 width: 10
-                height: throttleValue / 2
+                height: vThrottle * 50
                 color: "green"
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
@@ -66,10 +68,10 @@ ApplicationWindow {
         tickDivide: 120
         longTickEvery: 5
         labelSkipEvery: 10
-        needleValue: rpmValue / 1000
+        needleValue: vRpm / 1000
         tickColor: "#FE8000"
         strokeColor: "#FE8000"
-        backgroundColorInner: showLights.includes(
+        backgroundColorInner: vShowLights.includes(
                                   "DL_SHIFT") ? "#392424" : "#242424"
         redline: clShiftPoint / 1000
     }
@@ -83,7 +85,7 @@ ApplicationWindow {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        needleValue: speedValue
+        needleValue: vSpeed
         tickStep: 2
         tickCount: 151 // 75% + 1 for 3/4 quarters
         tickDivide: 200
@@ -132,13 +134,14 @@ ApplicationWindow {
     }
 
     Rectangle {
+        id: indicators
         width: 0.5 * parent.width
         height: 0.1 * parent.height
         color: "#1F1F1F"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.margins: 20
-        radius: 10
+        radius: height/5
         border.color: "#292929"
         border.width: 1
         Image {
@@ -153,8 +156,8 @@ ApplicationWindow {
             // For the layered items, you can assign a MultiEffect directly
             // to layer.effect.
             layer.effect: MultiEffect {
-                saturation: showLights.includes("DL_SIGNAL_L") ? 1.0 : -1.0
-                opacity: showLights.includes("DL_SIGNAL_L") ? 1.0 : 0.5
+                saturation: vShowLights.includes("DL_SIGNAL_L") ? 1.0 : -1.0
+                opacity: vShowLights.includes("DL_SIGNAL_L") ? 1.0 : 0.5
             }
         }
         Image {
@@ -169,8 +172,37 @@ ApplicationWindow {
             // For the layered items, you can assign a MultiEffect directly
             // to layer.effect.
             layer.effect: MultiEffect {
-                saturation: showLights.includes("DL_SIGNAL_R") ? 1.0 : -1.0
-                opacity: showLights.includes("DL_SIGNAL_R") ? 1.0 : 0.5
+                saturation: vShowLights.includes("DL_SIGNAL_R") ? 1.0 : -1.0
+                opacity: vShowLights.includes("DL_SIGNAL_R") ? 1.0 : 0.5
+            }
+        }
+    }
+    Rectangle {
+        id: shifterLightBox
+        height: 0.05 * parent.height
+        width: numLeds*height
+        color: "#1F1F1F"
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.margins: 10
+        radius: height/5
+        border.color: "#292929"
+        border.width: 1
+        // Repeater to create an array of shift lights
+        Repeater {
+            model: numLeds
+            Rectangle {
+                width: parent.height * 0.8
+                height: width
+                radius: width / 2
+                color: clShiftPoint > 0 ? (vRpm > clShiftPoint ? "#CF0404" : "#1F0505") : (vShowLights.includes(
+                                                                                               "DL_SHIFT") ? "#CF0404" : "#1F0505")
+                // Position each circle in a horizontal line
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width + 5)
+                anchors.verticalCenter: parent.verticalCenter
+                border.color: "#252525"
+                border.width: 1
             }
         }
     }
@@ -219,26 +251,139 @@ ApplicationWindow {
             portInput.visible = true
         }
     }
-    property real rpmValue: 0.0
-    property real speedValue: 0.0
-    property real throttleValue: 0.0
-    property real turboValue: 0.0
-    property var ogFlags: []
-    property var showLights: []
 
+    Button {
+        text: "..."
+        font.pixelSize: 24
+        width: 45
+        height: 45
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.margins: 20
+
+        onClicked: menuPopup.open()
+    }
+
+    // Popup Menu (placed outside Flickable)
+    Popup {
+        id: menuPopup
+        width: parent.width * 0.4
+        height: parent.height * 0.3
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        anchors.centerIn: parent  // Center the menu in the screen
+
+        background: Rectangle {
+            color: "#222"
+            radius: 5
+            border.color: "#777777"
+            border.width: 1
+        }
+
+        Flickable {
+            anchors.fill: parent
+            clip: true  // Ensures content doesn't overflow outside
+            contentWidth: parent.width
+            contentHeight: columnLayout.height
+            flickableDirection: Flickable.VerticalFlick  // Enables vertical scrolling
+            ScrollBar.vertical: ScrollBar {
+                parent: flickable.parent
+                anchors.top: flickable.top
+                anchors.left: flickable.right
+                anchors.bottom: flickable.bottom
+            }
+
+            Column {
+                id: columnLayout
+                width: parent.width
+                spacing: 20
+
+                // Tickbox
+                CheckBox {
+                    text: "Enable client side redline/shift lights"
+                    checked: false
+                    font.pixelSize: 16
+                    onCheckedChanged: {
+                        console.log("Tickbox:", checked)
+                        clShiftPoint = checked ? clRedlineBox.text : -1
+                    }
+                }
+
+                // Text Field
+                TextField {
+                    id: clRedlineBox
+                    text: "8000"
+                    placeholderText: "Redline"
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    width: parent.width * 0.8
+                    height: 40
+                    color: "#FFFFFF"
+                    placeholderTextColor: "#A0A0A0"
+                    background: Rectangle {
+                        color: "#333333"
+                        radius: 5
+                        border.color: "#555555"
+                        border.width: 1
+                    }
+                    onTextChanged: {
+                        if (!isFinite(text)) {
+                            console.log("Invalid Redline number!")
+                        } else {
+                            clShiftPoint = text
+                        }
+                    }
+                }
+
+                // Slider
+                Slider {
+                    id: slider
+                    width: parent.width * 0.8
+                    from: 0
+                    to: 100
+                    value: 50
+                    onValueChanged: console.log("Slider Value:", value)
+                }
+            }
+        }
+    }
+
+    property var vFlags: []
+    property int vGear: 0
+    property real vSpeed: 0.0
+    property real vRpm: 0.0
+    property real vTurbo: 0.0
+    property real vEngTemp: 0.0
+    property real vFuel: 0.0
+    property real vOilTemp: 0.0
+    property var vDashLights: []
+    property var vShowLights: []
+    property real vThrottle: 0.0
+    property real vBrake: 0.0
+    property real vClutch: 0.0
+    property int vId: 0
     // Client side options
-    property real clShiftPoint: 7000.0
+    property real clShiftPoint: -1
+    property int numLeds: clShiftPoint > 0 ? 9 : 1
 
     // Connect to C++ signal for a packet
     Connections {
         target: udpListener
         onOutGaugeUpdated: function (data) {
-            rpmValue = data.rpm
-            speedValue = data.speed * 3.6 // Converting speed from m/s to km/h
-            throttleValue = data.throttle * 100
-            turboValue = data.turbo
-            ogFlags = data.flags
-            showLights = data.showLights
+            vFlags = data.flags
+            vGear = data.gear
+            vSpeed = data.speed * 3.6 // Convert speed from m/s to km/h
+            vRpm = data.rpm
+            vTurbo = data.turbo
+            vEngTemp = data.engTemp
+            vFuel = data.fuel
+            vOilTemp = data.oilTemp
+            vDashLights = data.dashLights
+            vShowLights = data.showLights
+            vThrottle = data.throttle
+            vBrake = data.brake
+            vClutch = data.clutch
+            vId = data.id
         }
     }
 }

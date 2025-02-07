@@ -85,22 +85,23 @@ void UdpListener::processDatagrams() {
             OutGaugePacket packet;
             // Copy the received datagram into the OutGaugePacket struct
             std::memcpy(&packet, datagram.data(), sizeof(OutGaugePacket));
-
             // Create a QVariantMap to hold the parsed data so we can access it via QML
             QVariantMap data;
+            data["flags"] = readFlags(packet.flags, m_ogFlags);
+            data["gear"] = packet.gear; // Reverse:0, Neutral:1, First:2...
+            data["speed"] = packet.speed; // M/S
             data["rpm"] = packet.rpm;
-            data["speed"] = packet.speed;
-            data["throttle"] = packet.throttle;
-            data["turbo"] = packet.turbo;
-            data["gear"] = packet.gear;
+            data["turbo"] = packet.turbo; // BAR
+            data["engTemp"] = packet.engTemp;
             data["fuel"] = packet.fuel;
-            // Read the OG_flags from the packet and check active ones using QHash
-            QStringList active_ogFlags = readFlags(packet.flags, m_ogFlags);
-            data["flags"] = active_ogFlags;
-            // ALL dash lights
-            data["dashLights"] = readFlags(packet.dashLights, m_dlFlags);
-            // SHOWN dash lights
-            data["showLights"] = readFlags(packet.showLights, m_dlFlags);
+            data["oilTemp"] = packet.oilTemp;
+            data["dashLights"] = readFlags(packet.dashLights, m_dlFlags); // ALL dash lights
+            data["showLights"] = readFlags(packet.showLights, m_dlFlags); // SHOWN dash lights
+            data["throttle"] = packet.throttle;
+            data["brake"] = packet.brake;
+            data["clutch"] = packet.clutch;
+            data["id"] = packet.id;
+
 
             // Emit the signal with the QVariantMap containing the data
             emit outGaugeUpdated(data);

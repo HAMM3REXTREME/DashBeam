@@ -33,14 +33,8 @@ int main(int argc, char *argv[]) {
     dl_flags[1024] = "DL_ABS";        // abs active or switched off
     dl_flags[2048] = "DL_SPARE";      // N/A
 
-    QList<QHostAddress> list = QNetworkInterface::allAddresses();
-    for (int nIter = 0; nIter < list.count(); nIter++) {
-        if (!list[nIter].isLoopback())
-            if (list[nIter].protocol() == QAbstractSocket::IPv4Protocol) qDebug() << list[nIter].toString();
-    }
-
     // Create the UdpListener and start listening on port 4444
-    UdpListener udpListener(4444, og_flags, dl_flags);  // Change to your UDP port
+    UdpListener udpListener(4444, og_flags, dl_flags);
     udpListener.start();
     // Expose the UdpListener to QML so that we can access it in the QML UI
     engine.rootContext()->setContextProperty("udpListener", &udpListener);
