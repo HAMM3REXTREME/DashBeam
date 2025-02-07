@@ -9,7 +9,7 @@ ApplicationWindow {
     height: 720
     title: "DashBeam - BeamNG dashboard"
 
-    Material.theme: Material.Dark
+    //Material.theme: Material.Dark
 
     Rectangle {
         width: parent.width
@@ -73,7 +73,7 @@ ApplicationWindow {
         strokeColor: "#FE8000"
         backgroundColorInner: vShowLights.includes(
                                   "DL_SHIFT") ? "#392424" : "#242424"
-        redline: clShiftPoint / 1000
+        redline: clShiftPoint > 0 ? clShiftPoint / 1000 : 99999.9
     }
 
     // Speed Gauge (Right)
@@ -114,25 +114,6 @@ ApplicationWindow {
             border.width: 1
         }
     }
-
-    RoundButton {
-        id: portStart
-        width: 150
-        height: 40
-        radius: 5
-        text: "Start Listening"
-        anchors.left: portInput.right
-        anchors.bottom: portInput.bottom
-        onClicked: {
-            var port = parseInt(portInput.text)
-            if (port && port > 0 && port <= 65535) {
-                udpListener.setPort(port)
-            } else {
-                console.log("Invalid port number.")
-            }
-        }
-    }
-
     Rectangle {
         id: indicators
         width: 0.5 * parent.width
@@ -264,89 +245,7 @@ ApplicationWindow {
         onClicked: menuPopup.open()
     }
 
-    // Popup Menu (placed outside Flickable)
-    Popup {
-        id: menuPopup
-        width: parent.width * 0.4
-        height: parent.height * 0.3
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        anchors.centerIn: parent  // Center the menu in the screen
 
-        background: Rectangle {
-            color: "#222"
-            radius: 5
-            border.color: "#777777"
-            border.width: 1
-        }
-
-        Flickable {
-            anchors.fill: parent
-            clip: true  // Ensures content doesn't overflow outside
-            contentWidth: parent.width
-            contentHeight: columnLayout.height
-            flickableDirection: Flickable.VerticalFlick  // Enables vertical scrolling
-            ScrollBar.vertical: ScrollBar {
-                parent: flickable.parent
-                anchors.top: flickable.top
-                anchors.left: flickable.right
-                anchors.bottom: flickable.bottom
-            }
-
-            Column {
-                id: columnLayout
-                width: parent.width
-                spacing: 20
-
-                // Tickbox
-                CheckBox {
-                    text: "Enable client side redline/shift lights"
-                    checked: false
-                    font.pixelSize: 16
-                    onCheckedChanged: {
-                        console.log("Tickbox:", checked)
-                        clShiftPoint = checked ? clRedlineBox.text : -1
-                    }
-                }
-
-                // Text Field
-                TextField {
-                    id: clRedlineBox
-                    text: "8000"
-                    placeholderText: "Redline"
-                    inputMethodHints: Qt.ImhFormattedNumbersOnly
-                    width: parent.width * 0.8
-                    height: 40
-                    color: "#FFFFFF"
-                    placeholderTextColor: "#A0A0A0"
-                    background: Rectangle {
-                        color: "#333333"
-                        radius: 5
-                        border.color: "#555555"
-                        border.width: 1
-                    }
-                    onTextChanged: {
-                        if (!isFinite(text)) {
-                            console.log("Invalid Redline number!")
-                        } else {
-                            clShiftPoint = text
-                        }
-                    }
-                }
-
-                // Slider
-                Slider {
-                    id: slider
-                    width: parent.width * 0.8
-                    from: 0
-                    to: 100
-                    value: 50
-                    onValueChanged: console.log("Slider Value:", value)
-                }
-            }
-        }
-    }
 
     property var vFlags: []
     property int vGear: 0
