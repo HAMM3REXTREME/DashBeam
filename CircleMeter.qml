@@ -9,9 +9,9 @@ Item {
     property int tickDivide: 24 // How many ticks to divide by (like a pie)
     property real tickStep: 500 // Value change between every tick
     property int labelSkipEvery: 2 // Skip labelling every nth tick
-    property int labelFontSize: radius/12 // Font size of labels
-    property int longTickLength: radius/8 // Pixel value of long ticks
-    property int shortTickLength: radius/16 // Pixel value of short ticks
+    property int labelFontSize: radius / 12 // Font size of labels
+    property int longTickLength: radius / 8 // Pixel value of long ticks
+    property int shortTickLength: radius / 16 // Pixel value of short ticks
     property int longTickEvery: 2 // Longer tick line every n
     property int radius: 150
     property color backgroundColorInner: "#242424"
@@ -22,7 +22,8 @@ Item {
     property color needleColor: "red"
     property real needleValue: 0
     property real startAngle: 180
-    property real redline: 9999.9
+    property real redline: 99999.9
+    property bool repaint: false
 
     property real ghostRotation: 0
 
@@ -31,61 +32,66 @@ Item {
         width: parent.width
         height: parent.height
         onPaint: {
-            var ctx = getContext("2d");
+            var ctx = getContext("2d")
             // Gradient
-            var grad = ctx.createRadialGradient(width / 2, height / 2, radius * 0.7, width / 2, height / 2, radius);
-            grad.addColorStop(0, backgroundColorInner);
-            grad.addColorStop(1, backgroundColorOuter);
+            var grad = ctx.createRadialGradient(width / 2, height / 2,
+                                                radius * 0.7, width / 2,
+                                                height / 2, radius)
+            grad.addColorStop(0, backgroundColorInner)
+            grad.addColorStop(1, backgroundColorOuter)
             // Draw the circular background
-            ctx.beginPath();
-            ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.lineWidth = radius/50;
-            ctx.strokeStyle = strokeColor;
-            ctx.stroke();
+            ctx.beginPath()
+            ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2)
+            ctx.fillStyle = grad
+            ctx.fill()
+            ctx.lineWidth = radius / 50
+            ctx.strokeStyle = strokeColor
+            ctx.stroke()
 
             // Draw the alternating long and short ticks
             for (var i = 0; i < tickCount; i++) {
-                var angle = (startAngle*(Math.PI/180)) - (Math.PI/2) + (Math.PI * 2 / tickDivide) * i;
-                var tickLength = (i % longTickEvery === 0) ? longTickLength : shortTickLength;
-                var startX = width / 2 + Math.cos(angle) * (radius - tickLength);
-                var startY = height / 2 + Math.sin(angle) * (radius - tickLength);
-                var endX = width / 2 + Math.cos(angle) * (0.98*radius);
-                var endY = height / 2 + Math.sin(angle) * (0.98*radius);
+                var angle = (startAngle * (Math.PI / 180)) - (Math.PI / 2)
+                        + (Math.PI * 2 / tickDivide) * i
+                var tickLength = (i % longTickEvery === 0) ? longTickLength : shortTickLength
+                var startX = width / 2 + Math.cos(angle) * (radius - tickLength)
+                var startY = height / 2 + Math.sin(
+                            angle) * (radius - tickLength)
+                var endX = width / 2 + Math.cos(angle) * (0.98 * radius)
+                var endY = height / 2 + Math.sin(angle) * (0.98 * radius)
 
-                ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
-                ctx.lineWidth = radius/75;
-                ctx.strokeStyle = (i * tickStep) < redline ? tickColor : tickColorRedline;
-                ctx.stroke();
+                ctx.beginPath()
+                ctx.moveTo(startX, startY)
+                ctx.lineTo(endX, endY)
+                ctx.lineWidth = radius / 75
+                ctx.strokeStyle = (i * tickStep) < redline ? tickColor : tickColorRedline
+                ctx.stroke()
 
                 // Draw labels
-                if (i%labelSkipEvery==0){
-                var labelX = width / 2 + Math.cos(angle) * (radius - longTickLength - labelFontSize);
-                var labelY = height / 2 + Math.sin(angle) * (radius - longTickLength - labelFontSize);
-                ctx.font = "bold " + labelFontSize +"px sans-serif";
-                ctx.fillStyle = tickColor;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(i * tickStep, labelX, labelY);}
-
+                if (i % labelSkipEvery == 0) {
+                    var labelX = width / 2 + Math.cos(
+                                angle) * (radius - longTickLength - labelFontSize)
+                    var labelY = height / 2 + Math.sin(
+                                angle) * (radius - longTickLength - labelFontSize)
+                    ctx.font = "bold " + labelFontSize + "px sans-serif"
+                    ctx.fillStyle = tickColor
+                    ctx.textAlign = "center"
+                    ctx.textBaseline = "middle"
+                    ctx.fillText(i * tickStep, labelX, labelY)
+                }
             }
         }
-
     }
 
     Rectangle {
         id: needle
         smooth: true
-        width: dial.radius/40
+        width: dial.radius / 40
         height: dial.radius * 0.85
         color: needleColor
         anchors.horizontalCenter: background.horizontalCenter
         anchors.bottom: background.verticalCenter
         transformOrigin: Item.Bottom
-        rotation: (dial.needleValue/dial.tickStep)*(360/dial.tickDivide) + dial.startAngle
+        rotation: (dial.needleValue / dial.tickStep) * (360 / dial.tickDivide) + dial.startAngle
     }
     MultiEffect {
         source: needle
@@ -104,18 +110,17 @@ Item {
         width: parent.width
         height: parent.height
         onPaint: {
-            var ctx = getContext("2d");
+            var ctx = getContext("2d")
             // Draw the circular midsection
-            ctx.beginPath();
-            ctx.arc(width / 2, height / 2, radius * 0.7 - longTickLength, 0, Math.PI * 2);
-            ctx.fillStyle = backgroundColorOuter; // Outer color for contrast
-            ctx.fill();
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = strokeColor;
-            ctx.stroke();
-
+            ctx.beginPath()
+            ctx.arc(width / 2, height / 2, radius * 0.7 - longTickLength, 0,
+                    Math.PI * 2)
+            ctx.fillStyle = backgroundColorOuter // Outer color for contrast
+            ctx.fill()
+            ctx.lineWidth = 1
+            ctx.strokeStyle = strokeColor
+            ctx.stroke()
         }
-
     }
 
     Timer {
@@ -124,18 +129,27 @@ Item {
         repeat: true
         onTriggered: {
             // Smoothly interpolate the ghost rotation to follow the needle with a delay
-            dial.ghostRotation = dial.ghostRotation + (needle.rotation - dial.ghostRotation) * 0.3;
+            dial.ghostRotation = dial.ghostRotation + (needle.rotation - dial.ghostRotation) * 0.3
         }
     }
 
     Connections {
-        target: dial
-        onBackgroundColorInnerChanged: {
-            background.requestPaint();
+        function onBackgroundColorInnerChanged() {
+            background.requestPaint()
         }
-        onBackgroundColorOuterChanged: {
-            background.requestPaint();
+
+        function onBackgroundColorOuterChanged() {
+            background.requestPaint()
+        }
+
+        function onRedlineChanged() {
+            background.requestPaint()
+        }
+
+        // Manually request repaint...
+        function onRepaintChanged() {
+            background.requestPaint()
+            repaint = false
         }
     }
-
 }

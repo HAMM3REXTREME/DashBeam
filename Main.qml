@@ -10,7 +10,14 @@ ApplicationWindow {
     title: "DashBeam - BeamNG dashboard"
 
     //Material.theme: Material.Dark
-
+    Component.onCompleted: {
+        console.log("Main Window: Starting udpListener...")
+        udpListener.setPort(ogPort)
+        udpListener.start()
+    }
+    onClosing: close => {
+                   udpListener.stop()
+               }
     Rectangle {
         width: parent.width
         height: parent.height
@@ -33,10 +40,7 @@ ApplicationWindow {
             }
             Text {
                 anchors.centerIn: parent
-                text: "Speed: " + vSpeed.toFixed(
-                          1) + " km/h\nThrottle: " + (100*vThrottle).toFixed(
-                          0) + "%\nTurbo: " + vTurbo.toFixed(
-                          1) + ((clShiftPoint <= vRpm) ? "\nSHIFT" : "")
+                text: "DashBeam\nBeamNG Drive Dashboard"
                 color: "white"
                 font.pixelSize: 16
                 font.family: uiFont.name
@@ -96,33 +100,15 @@ ApplicationWindow {
         longTickEvery: 5
     }
 
-    TextField {
-        id: portInput
-        anchors.bottom: parent.bottom
-        text: "4444"
-        placeholderText: "Port"
-        inputMethodHints: Qt.ImhFormattedNumbersOnly
-        width: 75
-        height: 40
-        // Styling for a dark theme
-        color: "#FFFFFF"
-        placeholderTextColor: "#A0A0A0"
-        background: Rectangle {
-            color: "#333333"
-            radius: 5
-            border.color: "#555555"
-            border.width: 1
-        }
-    }
     Rectangle {
         id: indicators
-        width: 0.5 * parent.width
-        height: 0.1 * parent.height
+        width: 0.4 * parent.width
+        height: 0.08 * parent.height
         color: "#1F1F1F"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.margins: 20
-        radius: height/5
+        anchors.margins: parent.height * 0.1
+        radius: height / 5
         border.color: "#292929"
         border.width: 1
         Image {
@@ -161,92 +147,63 @@ ApplicationWindow {
     Rectangle {
         id: shifterLightBox
         height: 0.05 * parent.height
-        width: numLeds*height
+        width: clShiftPoint > 0 ? numLeds * height : 0.1 * parent.width
         color: "#1F1F1F"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.margins: 10
-        radius: height/5
+        anchors.margins: parent.height * 0.025
+        radius: height / 5
         border.color: "#292929"
         border.width: 1
         // Repeater to create an array of shift lights
         Repeater {
             model: numLeds
             Rectangle {
-                width: parent.height * 0.8
-                height: width
+                width: clShiftPoint > 0 ? parent.height * 0.8 : parent.width * 0.8
+                height: parent.height * 0.8
                 radius: width / 2
-                color: clShiftPoint > 0 ? (vRpm > clShiftPoint ? "#CF0404" : "#1F0505") : (vShowLights.includes(
-                                                                                               "DL_SHIFT") ? "#CF0404" : "#1F0505")
+                color: clShiftPoint > 0 ? (vRpm > clShiftPoint ? "#CF0404" : "#1F0505") : (vShowLights.includes("DL_SHIFT") ? "#CF0404" : "#1F0505")
                 // Position each circle in a horizontal line
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width + 5)
+                anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width * 1.1)
                 anchors.verticalCenter: parent.verticalCenter
                 border.color: "#252525"
                 border.width: 1
             }
         }
     }
-    Rectangle {
-        id: ipBox
-        width: ipText.implicitWidth
-        height: ipText.implicitHeight
-        color: "#1F1F1F"
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: 20
-        radius: 5
-        border.color: "#292929"
-        border.width: 1
-        Text {
-            id: ipText
-            width: parent.width
-            height: parent.height
-            anchors.centerIn: parent.centerIn
-            text: "Your IP address:\n" + (networkInfo ? networkInfo.ipAddresses : "No IP addresses available")
-            wrapMode: TextArea.Wrap
-            color:  "#FFFFFF"
-        }
-    }
-    // Timer for inactivity detection
-    Timer {
-        id: inactivityTimer
-        interval: 10 * 1000  // milliseconds
-        running: false
-        repeat: false  // Run once after the specified time
-        onTriggered: {
-            // Hide elements after inactivity
-            ipBox.visible = false
-            portStart.visible = false
-            portInput.visible = false
-        }
-    }
-    MouseArea {
-        id: globalMouseArea
+    // Settings Page Loader
+    Loader {
+        id: pageLoader
         anchors.fill: parent
-        onClicked: {
-            // Reset the timer and show elements on click anywhere
-            inactivityTimer.start()
-            ipBox.visible = true
-            portStart.visible = true
-            portInput.visible = true
+        onItemChanged: {
+            if (pageLoader.item) {
+                // Connect the settingsChanged signal from SettingsPage.qml
+                pageLoader.item.settingsChanged.connect(updateSettings)
+            }
         }
     }
-
-    Button {
-        text: "..."
-        font.pixelSize: 24
-        width: 45
-        height: 45
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.margins: 20
-
-        onClicked: menuPopup.open()
+    function updateSettings(newPort, newShiftPoint) {
+        console.log("Main Window: Hotplugging new settings...")
+        if (ogPort != newPort) {
+            console.log("Main Window: Different port, restarting udpListener...")
+            udpListener.setPort(newPort)
+            udpListener.start()
+        }
+        ogPort = newPort
+        clShiftPoint = newShiftPoint
     }
+    RoundButton {
+        text: "Settings"
+        width: 100
+        height: 40
+        radius: 5
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.margins: 10
 
-
-
+        onClicked: pageLoader.source = "SettingsPage.qml"
+    }
     property var vFlags: []
     property int vGear: 0
     property real vSpeed: 0.0
@@ -262,13 +219,16 @@ ApplicationWindow {
     property real vClutch: 0.0
     property int vId: 0
     // Client side options
-    property real clShiftPoint: -1
+    property real clShiftPoint: settingsManager.loadSetting("shiftPoint",
+                                                            "-1").toString()
     property int numLeds: clShiftPoint > 0 ? 9 : 1
+    property int ogPort: settingsManager.loadSetting("ogPort",
+                                                     "4444").toString()
 
     // Connect to C++ signal for a packet
     Connections {
         target: udpListener
-        onOutGaugeUpdated: function (data) {
+        function onOutGaugeUpdated(data) {
             vFlags = data.flags
             vGear = data.gear
             vSpeed = data.speed * 3.6 // Convert speed from m/s to km/h

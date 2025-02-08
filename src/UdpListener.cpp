@@ -52,21 +52,30 @@ UdpListener::UdpListener(quint16 port, const QHash<int, QString>& ogFlags, const
 void UdpListener::start() {
     // Bind the socket to the provided port
     if (!m_socket->bind(QHostAddress::Any, m_port)) {
-        qWarning() << "Failed to bind UDP socket on port" << m_port;
+        qWarning() << "start(): Failed to bind UDP socket on port" << m_port;
     } else {
-        qDebug() << "UDP listener started on port" << m_port;
+        qDebug() << "start(): UDP listener started on port" << m_port;
     }
 }
 
 void UdpListener::setPort(quint16 newPort) {
-    qDebug() << "Changing ports...";
     if (m_socket->state() == QAbstractSocket::BoundState) {
         // If already listening on a port, stop first
         m_socket->close();
     }
 
     m_port = newPort;
-    start();  // Restart with the new port
+    qDebug() << "setPort(): The port is now" << m_port << "- please call start()";
+}
+
+void UdpListener::stop() {
+    if (m_socket->state() == QAbstractSocket::BoundState) {
+        // Close the socket if it is currently bound
+        m_socket->close();
+        qDebug() << "UDP listener stopped on port" << m_port;
+    } else {
+        qWarning() << "UDP socket is not currently bound. Nothing to stop.";
+    }
 }
 
 void UdpListener::processDatagrams() {

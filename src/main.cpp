@@ -3,13 +3,11 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
+#include "SettingsManager.h"
 #include "NetInfo.h"
 #include "UdpListener.h"
 
 int main(int argc, char *argv[]) {
-    QGuiApplication app(argc, argv);
-    QQmlApplicationEngine engine;
-
     // OutGauge (OG) flags
     QHash<int, QString> og_flags;
     og_flags[1] = "OG_SHIFT";     // key // N/A
@@ -33,14 +31,15 @@ int main(int argc, char *argv[]) {
     dl_flags[1024] = "DL_ABS";        // abs active or switched off
     dl_flags[2048] = "DL_SPARE";      // N/A
 
-    // Create the UdpListener and start listening on port 4444
-    UdpListener udpListener(4444, og_flags, dl_flags);
-    udpListener.start();
-    // Expose the UdpListener to QML so that we can access it in the QML UI
-    engine.rootContext()->setContextProperty("udpListener", &udpListener);
+    SettingsManager settingsManager; // Persistent settings
+    UdpListener udpListener(4444, og_flags, dl_flags);     // Create the UdpListener for our outgauge packets
+    NetworkInfo networkInfo; // Gets IP Addresses
 
-    // Allows IP Addresses to be shown
-    NetworkInfo networkInfo;
+    // Qt initialization
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("settingsManager", &settingsManager);
+    engine.rootContext()->setContextProperty("udpListener", &udpListener);
     engine.rootContext()->setContextProperty("networkInfo", &networkInfo);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
