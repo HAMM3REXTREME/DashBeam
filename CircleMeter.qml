@@ -135,9 +135,8 @@ Item {
             color: dial.middleFontColor
             font.pixelSize: dial.middleFontSize
             font.family: middleFontName
-            font.weight: Font.Bold
-            wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
+            textFormat: Text.RichText
         }
         gradient: Gradient {
             GradientStop { position: 0.0; color: dial.screenBackground } // top

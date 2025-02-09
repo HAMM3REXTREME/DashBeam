@@ -98,7 +98,8 @@ ApplicationWindow {
         backgroundColorInner: vShowLights.includes(
                                   "DL_SHIFT") ? "#392424" : "#242424"
         redline: clShiftPoint > 0 ? clShiftPoint / 1000 : 99999.9
-        middleText: vRpm.toFixed()
+        middleText: "<h1><b>"+vRpm.toFixed()+"</b></h1><br>RPM"
+        middleFontSize: 24
         middleFontName: "JetBrains Mono Nerd Font"
     }
 
