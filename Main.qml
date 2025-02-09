@@ -90,11 +90,16 @@ ApplicationWindow {
         longTickEvery: 5
         labelSkipEvery: 10
         needleValue: vRpm / 1000
+        labelFontSize: radius/10
+        tickFontName: uiFont.name
         tickColor: "#FE8000"
         strokeColor: "#FE8000"
+        labelFontColor: "#FE8000"
         backgroundColorInner: vShowLights.includes(
                                   "DL_SHIFT") ? "#392424" : "#242424"
         redline: clShiftPoint > 0 ? clShiftPoint / 1000 : 99999.9
+        middleText: vRpm.toFixed()
+        middleFontName: "JetBrains Mono Nerd Font"
     }
 
     // Speed Gauge (Right)
@@ -113,8 +118,10 @@ ApplicationWindow {
         startAngle: 270
         tickColor: "#FE8000"
         strokeColor: "#FE8000"
+        labelFontColor: "#FE8000"
         labelSkipEvery: 10
         longTickEvery: 5
+        tickFontName: uiFont.name
     }
     // Turbo
     CircleMeter {
@@ -134,8 +141,12 @@ ApplicationWindow {
         startAngle: 270
         tickColor: "#FE8000"
         strokeColor: "#FE8000"
+        labelFontColor: "#FE8000"
         labelSkipEvery: 5
         longTickEvery: 5
+        tickFontName: uiFont.name
+        needleWidth: radius/20
+        labelFontSize: radius/8
     }
 
     Rectangle {
@@ -225,21 +236,74 @@ ApplicationWindow {
         radius: height / 5
         border.color: "#292929"
         border.width: 1
+        // This part: ---______
+        property color shadeOnLow: "#5dd317"
+        property color shadeOffLow: "#445e31"
+        // ___---___
+        property color shadeOnMiddle: '#d6b10d'
+        property color shadeOffMiddle:'#5b5228'
+        // ______---
+        property color shadeOnHigh: "#CF0404"
+        property color shadeOffHigh: "#1F0505"
+        // All parts: ---------
+        property color shadeAll: "#e807bb"
         // Repeater to create an array of shift lights
         Repeater {
             model: numLeds
             Rectangle {
+                id: led
                 width: clShiftPoint > 0 ? parent.height * 0.8 : parent.width * 0.8
                 height: parent.height * 0.8
                 radius: width / 2
-                color: {clShiftPoint > 0 ? (vRpm > (clShiftPoint - (numLeds-index)*100) ? "#CF0404" : "#1F0505") : (vShowLights.includes("DL_SHIFT") ? "#CF0404" : "#1F0505")}
+                property bool isOn: false
+                color: {
+                    // Only for client side shift lights
+                    if (clShiftPoint > 0) {
+                        // Yellows - default shade
+                        let shadeOff = shifterLightBox.shadeOffMiddle
+                        let shadeOn = shifterLightBox.shadeOnMiddle
+                        let vRpmRound = Math.round(vRpm / 100) * 100
+                        if ((numLeds - index) > 6){
+                           shadeOff = shifterLightBox.shadeOffLow
+                           shadeOn = shifterLightBox.shadeOnLow
+                        }
+                        if ((numLeds - index) <= 3){
+                           shadeOn = shifterLightBox.shadeOnHigh
+                           shadeOff = shifterLightBox.shadeOffHigh
+                        }
+                        if (vRpm >= clShiftPoint){
+                            shadeOn = shifterLightBox.shadeAll // SHIFT NOW
+                        }
+                        if (vRpmRound >= (clShiftPoint - (numLeds - index - 1) * 100)) {
+                            isOn = true
+                            return shadeOn
+                        } else {
+                            isOn = false
+                            return shadeOff
+                        }
+                    } else {
+                        // BeamNG shift lights
+                        if (vShowLights.includes("DL_SHIFT")) {
+                            return "#CF0404" // Red color when the shift light is shown
+                        } else {
+                            return "#1F0505" // Dark red if the shift light is not shown
+                        }
+                    }
+                }
                 // Position each circle in a horizontal line
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width * 1.1)
                 anchors.verticalCenter: parent.verticalCenter
                 border.color: "#252525"
                 border.width: 1
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    blurEnabled: isOn
+                    blurMax: 64
+                    blur: 0.1
+                }
             }
+
         }
     }
     // Settings Page Loader

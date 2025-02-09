@@ -15,16 +15,25 @@ Item {
     property int shortTickLength: radius / 16 // Pixel value of short ticks
     property int longTickEvery: 2 // Longer tick line every n
     property int radius: 150
-    property color backgroundColorInner: "#242424"
+    property color backgroundColorInner: "#232323"
     property color backgroundColorOuter: "#2F2F2F"
+    property color screenBackground: "#202021"
     property color strokeColor: "#FFFFFF"
     property color tickColor: "#FFFFFF"
     property color tickColorRedline: "#FF0000"
+    property color labelFontColor: "#FFFFFF"
+    property color middleFontColor: "#FFFFFF"
     property color needleColor: "red"
     property real needleValue: 0
+    property real needleWidth: radius / 40
     property real startAngle: 180
     property real redline: 99999.9
     property bool repaint: false
+    property bool showScreen: true
+    property string tickFontName: "sans-serif"
+    property string middleFontName: "monospace"
+    property real middleFontSize: radius/5
+    property string middleText: ""
 
     property real ghostRotation: 0
 
@@ -72,9 +81,9 @@ Item {
                     var labelX = width / 2 + Math.cos(
                                 angle) * (radius - longTickLength - labelFontSize)
                     var labelY = height / 2 + Math.sin(
-                                angle) * (radius - longTickLength - labelFontSize)
-                    ctx.font = "bold " + labelFontSize + "px sans-serif"
-                    ctx.fillStyle = tickColor
+                                angle) * (radius - longTickLength - labelFontSize) + labelFontSize/6 // Visual offset
+                    ctx.font = "bold " + labelFontSize + "px " + tickFontName
+                    ctx.fillStyle = labelFontColor
                     ctx.textAlign = "center"
                     ctx.textBaseline = "middle"
                     ctx.fillText((i * tickStep)+tickStart, labelX, labelY)
@@ -86,12 +95,15 @@ Item {
     Rectangle {
         id: needle
         smooth: true
-        width: dial.radius / 40
+        width: dial.needleWidth
         height: dial.radius * 0.85
-        color: needleColor
         anchors.horizontalCenter: background.horizontalCenter
         anchors.bottom: background.verticalCenter
         transformOrigin: Item.Bottom
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: needleColor } // Tip (of the needle)
+            GradientStop { position: 0.4; color: "#000000AA" } // Base
+        }
         rotation: ((dial.needleValue - dial.tickStart)/ dial.tickStep) * (360 / dial.tickDivide) + dial.startAngle
     }
     MultiEffect {
@@ -106,22 +118,32 @@ Item {
         rotation: dial.ghostRotation
     }
 
-    Canvas {
+    Rectangle {
         id: middleSection
-        width: parent.width
-        height: parent.height
-        onPaint: {
-            var ctx = getContext("2d")
-            // Draw the circular midsection
-            ctx.beginPath()
-            ctx.arc(width / 2, height / 2, radius * 0.7 - longTickLength, 0,
-                    Math.PI * 2)
-            ctx.fillStyle = backgroundColorOuter // Outer color for contrast
-            ctx.fill()
-            ctx.lineWidth = 1
-            ctx.strokeStyle = strokeColor
-            ctx.stroke()
+        clip: true
+        visible: dial.showScreen
+        width: dial.radius * 1.4 - longTickLength - labelFontSize
+        height: dial.radius * 1.4 - longTickLength - labelFontSize
+        color: dial.screenBackground
+        border.color: dial.strokeColor   // Stroke color
+        border.width: 1
+        radius: dial.width / 2           // Fully rounded (circle)
+        anchors.centerIn: parent
+        Text {
+            anchors.centerIn: parent
+            text: dial.middleText
+            color: dial.middleFontColor
+            font.pixelSize: dial.middleFontSize
+            font.family: middleFontName
+            font.weight: Font.Bold
+            wrapMode: Text.Wrap
+            horizontalAlignment: Text.AlignHCenter
         }
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: dial.screenBackground } // top
+            GradientStop { position: 1.0; color: "#060607" } // bottom
+        }
+
     }
 
     Timer {
