@@ -8,6 +8,7 @@ Item {
     property int tickCount: 19 // Numbers of ticks visible
     property int tickDivide: 24 // How many ticks to divide by (like a pie)
     property real tickStep: 500 // Value change between every tick
+    property real tickStart: 0 // Start labelling from
     property int labelSkipEvery: 2 // Skip labelling every nth tick
     property int labelFontSize: radius / 12 // Font size of labels
     property int longTickLength: radius / 8 // Pixel value of long ticks
@@ -76,7 +77,7 @@ Item {
                     ctx.fillStyle = tickColor
                     ctx.textAlign = "center"
                     ctx.textBaseline = "middle"
-                    ctx.fillText(i * tickStep, labelX, labelY)
+                    ctx.fillText((i * tickStep)+tickStart, labelX, labelY)
                 }
             }
         }
@@ -91,7 +92,7 @@ Item {
         anchors.horizontalCenter: background.horizontalCenter
         anchors.bottom: background.verticalCenter
         transformOrigin: Item.Bottom
-        rotation: (dial.needleValue / dial.tickStep) * (360 / dial.tickDivide) + dial.startAngle
+        rotation: ((dial.needleValue - dial.tickStart)/ dial.tickStep) * (360 / dial.tickDivide) + dial.startAngle
     }
     MultiEffect {
         source: needle

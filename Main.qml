@@ -34,15 +34,32 @@ ApplicationWindow {
             anchors.centerIn: parent
             border.color: "#292929"
             border.width: 1
+            clip: true
+            Image {
+                id: brandingIcon
+                source: "assets/screen_topleft.svg"
+                layer.enabled: true
+                width: parent.height
+                height: parent.height
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.margins: 5
+                // For the layered items, you can assign a MultiEffect directly
+                // to layer.effect.
+                layer.effect: MultiEffect {
+                    saturation: vThrottle == 1 ? 1.0 : -1.0
+                    opacity: vThrottle == 1 ? 1.0 : 0.5
+                }
+            }
             FontLoader {
                 id: uiFont
                 source: "assets/Aldrich-Regular.ttf"
             }
             Text {
                 anchors.centerIn: parent
-                text: "DashBeam\nBeamNG Drive Dashboard"
+                text: (vGear - 1).toString()
                 color: "white"
-                font.pixelSize: 16
+                font.pixelSize: 108
                 font.family: uiFont.name
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
@@ -99,6 +116,27 @@ ApplicationWindow {
         labelSkipEvery: 10
         longTickEvery: 5
     }
+    // Turbo
+    CircleMeter {
+        id: boostGauge
+        visible: vFlags.includes("OG_TURBO")
+        tickStart: -1.5
+        radius: Math.min(parent.width / 8, parent.height / 8) - 10
+        width: parent.width / 4
+        height: parent.height/ 4
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: parent.height * 0.01
+        needleValue: vTurbo
+        tickStep: 0.1
+        tickCount: 41
+        tickDivide: 50
+        startAngle: 270
+        tickColor: "#FE8000"
+        strokeColor: "#FE8000"
+        labelSkipEvery: 5
+        longTickEvery: 5
+    }
 
     Rectangle {
         id: indicators
@@ -113,10 +151,10 @@ ApplicationWindow {
         border.width: 1
         Image {
             id: sourceItemL
-            source: "assets/signal_l.png"
+            source: "assets/signal_l.svg"
             layer.enabled: true
-            width: parent.height - 10
-            height: parent.height - 10
+            width: parent.height - 15
+            height: parent.height - 15
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: 10
@@ -128,11 +166,43 @@ ApplicationWindow {
             }
         }
         Image {
-            id: sourceItemR
-            source: "assets/signal_r.png"
+            id: highbeamImg
+            source: "assets/highbeam.svg"
             layer.enabled: true
-            width: parent.height - 10
-            height: parent.height - 10
+            width: parent.height - 15
+            height: parent.height - 15
+            anchors.left: sourceItemL.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: 10
+            // For the layered items, you can assign a MultiEffect directly
+            // to layer.effect.
+            layer.effect: MultiEffect {
+                saturation: vShowLights.includes("DL_FULLBEAM") ? 1.0 : -1.0
+                opacity: vShowLights.includes("DL_FULLBEAM") ? 1.0 : 0.5
+            }
+        }
+        Image {
+            id: handbrakeWarn
+            source: "assets/handbrake.svg"
+            layer.enabled: true
+            width: parent.height - 15
+            height: parent.height - 15
+            anchors.right: sourceItemR.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: 10
+            // For the layered items, you can assign a MultiEffect directly
+            // to layer.effect.
+            layer.effect: MultiEffect {
+                saturation: vShowLights.includes("DL_HANDBRAKE") ? 1.0 : -1.0
+                opacity: vShowLights.includes("DL_HANDBRAKE") ? 1.0 : 0.5
+            }
+        }
+        Image {
+            id: sourceItemR
+            source: "assets/signal_r.svg"
+            layer.enabled: true
+            width: parent.height - 15
+            height: parent.height - 15
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: 10
@@ -162,7 +232,7 @@ ApplicationWindow {
                 width: clShiftPoint > 0 ? parent.height * 0.8 : parent.width * 0.8
                 height: parent.height * 0.8
                 radius: width / 2
-                color: clShiftPoint > 0 ? (vRpm > clShiftPoint ? "#CF0404" : "#1F0505") : (vShowLights.includes("DL_SHIFT") ? "#CF0404" : "#1F0505")
+                color: {clShiftPoint > 0 ? (vRpm > (clShiftPoint - (numLeds-index)*100) ? "#CF0404" : "#1F0505") : (vShowLights.includes("DL_SHIFT") ? "#CF0404" : "#1F0505")}
                 // Position each circle in a horizontal line
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width * 1.1)
