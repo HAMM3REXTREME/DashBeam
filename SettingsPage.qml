@@ -9,8 +9,9 @@ ApplicationWindow {
     width: 1280
     height: 720
     title: "DashBeam - Settings"
-    // TODO: More scalability
-    signal settingsChanged(int port, real shiftPoint)
+
+    signal portChanged(int port)
+    signal shiftPointChanged(real clShiftPoint)
 
     //Material.theme: Material.Dark
     property real clShiftPoint: -1
@@ -19,7 +20,6 @@ ApplicationWindow {
     onClosing: close => {
                    close.accepted = false // Prevents the default close action
                    pageLoader.source = ""
-                   settingsChanged(ogPort, clShiftPoint)
                }
     Rectangle {
         width: parent.width
@@ -89,7 +89,12 @@ ApplicationWindow {
                     onTextChanged: {
                         var port = parseInt(portInput.text)
                         if (port && port > 0 && port <= 65535) {
-                            ogPort = parseFloat(text)
+                            var newPort = parseFloat(text)
+                            if (ogPort !== newPort) {
+                                console.log("Different port number now...")
+                                portChanged(newPort)
+                            }
+                            ogPort = newPort
                             settingsManager.saveSetting("ogPort", ogPort)
                         } else {
                             console.log("Invalid port number.")
@@ -121,7 +126,12 @@ ApplicationWindow {
                         if (!isFinite(text)) {
                             console.log("Invalid Redline number!")
                         } else {
-                            clShiftPoint = parseFloat(text)
+                            var newClShiftPoint = parseFloat(text)
+                            if (clShiftPoint !== newClShiftPoint) {
+                                shiftPointChanged(newClShiftPoint)
+                                console.log("Different shift point now...")
+                            }
+                            clShiftPoint = newClShiftPoint
                             settingsManager.saveSetting("shiftPoint",
                                                         clShiftPoint)
                         }

@@ -32,7 +32,7 @@ Item {
     property bool showScreen: true
     property string tickFontName: "sans-serif"
     property string middleFontName: "monospace"
-    property real middleFontSize: radius/5
+    property real middleFontSize: radius / 5
     property string middleText: ""
 
     property real ghostRotation: 0
@@ -81,12 +81,13 @@ Item {
                     var labelX = width / 2 + Math.cos(
                                 angle) * (radius - longTickLength - labelFontSize)
                     var labelY = height / 2 + Math.sin(
-                                angle) * (radius - longTickLength - labelFontSize) + labelFontSize/6 // Visual offset
+                                angle) * (radius - longTickLength - labelFontSize)
+                            + labelFontSize / 6 // Visual offset
                     ctx.font = "bold " + labelFontSize + "px " + tickFontName
                     ctx.fillStyle = labelFontColor
                     ctx.textAlign = "center"
                     ctx.textBaseline = "middle"
-                    ctx.fillText((i * tickStep)+tickStart, labelX, labelY)
+                    ctx.fillText((i * tickStep) + tickStart, labelX, labelY)
                 }
             }
         }
@@ -101,10 +102,17 @@ Item {
         anchors.bottom: background.verticalCenter
         transformOrigin: Item.Bottom
         gradient: Gradient {
-            GradientStop { position: 0.0; color: needleColor } // Tip (of the needle)
-            GradientStop { position: 0.4; color: "#000000AA" } // Base
+            GradientStop {
+                position: 0.0
+                color: needleColor
+            } // Tip (of the needle)
+            GradientStop {
+                position: 0.4
+                color: "#000000AA"
+            } // Base
         }
-        rotation: ((dial.needleValue - dial.tickStart)/ dial.tickStep) * (360 / dial.tickDivide) + dial.startAngle
+        rotation: ((dial.needleValue - dial.tickStart) / dial.tickStep)
+                  * (360 / dial.tickDivide) + dial.startAngle
     }
     MultiEffect {
         source: needle
@@ -125,9 +133,9 @@ Item {
         width: dial.radius * 1.4 - longTickLength - labelFontSize
         height: dial.radius * 1.4 - longTickLength - labelFontSize
         color: dial.screenBackground
-        border.color: dial.strokeColor   // Stroke color
+        border.color: dial.strokeColor // Stroke color
         border.width: 1
-        radius: dial.width / 2           // Fully rounded (circle)
+        radius: dial.width / 2 // Fully rounded (circle)
         anchors.centerIn: parent
         Text {
             anchors.centerIn: parent
@@ -139,10 +147,15 @@ Item {
             textFormat: Text.RichText
         }
         gradient: Gradient {
-            GradientStop { position: 0.0; color: dial.screenBackground } // top
-            GradientStop { position: 1.0; color: "#060607" } // bottom
+            GradientStop {
+                position: 0.0
+                color: dial.screenBackground
+            } // top
+            GradientStop {
+                position: 1.0
+                color: "#060607"
+            } // bottom
         }
-
     }
 
     Timer {
