@@ -50,13 +50,11 @@ ApplicationWindow {
                 anchors.margins: 10
 
                 RoundButton {
-                    text: "X"
-                    font.pixelSize: 24
-                    radius: 25
-                    width: 50
-                    height: 50
+                    text: "Back"
+                    width: 80
+                    height: 40
+                    radius: 5
                     onClicked: {
-                        settingsChanged(ogPort, clShiftPoint)
                         pageLoader.source = ""
                     }
                 }
@@ -147,21 +145,41 @@ ApplicationWindow {
                     width: ipText.implicitWidth + 20
                     height: ipText.implicitHeight + 20
                     color: "#333333"
-                    radius: 20
+                    radius: 10
                     border.color: "#555555"
                     border.width: 2
 
                     Text {
                         id: ipText
+                        visible: false
                         anchors.centerIn: parent
                         anchors.margins: 10
+                        font.pixelSize: 24
+                        font.family: "monospace"
                         text: (networkInfo ? networkInfo.ipAddresses : "Can't find IP addresses")
                         wrapMode: TextArea.Wrap
                         color: "#FFFFFF"
                     }
+                    Text {
+                        id: ipTextHider
+                        visible: true
+                        anchors.centerIn: parent
+                        anchors.margins: 10
+                        font.pixelSize: 16
+                        text: "Click to reveal"
+                        wrapMode: TextArea.Wrap
+                        color: "#FFFFFF"
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            ipText.visible = !ipText.visible
+                            ipTextHider.visible = !ipTextHider.visible
+                        }
+                    }
                 }
                 Text {
-                    text: "DashBeam Pre release"
+                    text: "DashBeam alpha build"
                     color: "white"
                     font.pixelSize: 12
                 }
