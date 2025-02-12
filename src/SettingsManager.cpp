@@ -9,6 +9,7 @@ void SettingsManager::saveSetting(const QString &key, const QVariant &value)
 {
     // Save the setting
     settings->setValue(key, value);
+    emit settingChanged(key, value); // Notify QML about the change
 }
 
 QVariant SettingsManager::loadSetting(const QString &key, const QVariant &defaultValue)

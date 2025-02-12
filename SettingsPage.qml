@@ -4,11 +4,10 @@ import QtQuick.Shapes
 import QtQuick.Effects
 import QtQuick.Dialogs
 
-ApplicationWindow {
+Item {
     visible: true
     width: 1280
     height: 720
-    title: "DashBeam - Settings"
 
     signal portChanged(int port)
     signal shiftPointChanged(real clShiftPoint)
@@ -16,17 +15,19 @@ ApplicationWindow {
     //Material.theme: Material.Dark
     property real clShiftPoint: -1
     property int ogPort: 4444
-
-    onClosing: close => {
-                   close.accepted = false // Prevents the default close action
-                   pageLoader.source = ""
-               }
     Rectangle {
         width: parent.width
         height: parent.height
-        color: "#191919"
+        color: "#292929"
         anchors.centerIn: parent
-
+        Rectangle{
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.margins: 10
+            radius: 5
+            color: "#191919"
+            width: parent.width * 0.99
+            height: parent.height * 0.9
         Flickable {
             id: flickable
             anchors.fill: parent
@@ -35,10 +36,7 @@ ApplicationWindow {
             contentHeight: columnLayout.height
             flickableDirection: Flickable.VerticalFlick // Enables vertical scrolling
             ScrollBar.vertical: ScrollBar {
-                parent: flickable.parent
-                anchors.top: flickable.top
-                anchors.left: flickable.right
-                anchors.bottom: flickable.bottom
+                anchors.right: parent.right
             }
 
             Column {
@@ -49,15 +47,6 @@ ApplicationWindow {
                 anchors.top: parent.top
                 anchors.margins: 10
 
-                RoundButton {
-                    text: "Back"
-                    width: 80
-                    height: 40
-                    radius: 5
-                    onClicked: {
-                        pageLoader.source = ""
-                    }
-                }
                 Text {
                     text: "Options"
                     color: "white"
@@ -187,6 +176,19 @@ ApplicationWindow {
                     width: 1
                     height: flickable.height / 2 // Ensures smooth scrolling
                 }
+            }
+        }
+        }
+        RoundButton {
+            text: "Back"
+            width: 80
+            height: 40
+            radius: 5
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.margins: 10
+            onClicked: {
+                pageLoader.source = ""
             }
         }
     }

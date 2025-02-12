@@ -7,7 +7,7 @@ ApplicationWindow {
     visible: true
     width: 1280
     height: 720
-    title: "DashBeam - BeamNG dashboard"
+    title: "DashBeam"
 
     //Material.theme: Material.Dark
     Component.onCompleted: {
@@ -333,18 +333,6 @@ ApplicationWindow {
             }
         }
     }
-    // Settings Page Loader
-    Loader {
-        id: pageLoader
-        anchors.fill: parent
-        onItemChanged: {
-            if (pageLoader.item) {
-                // Connect to settings page signals
-                pageLoader.item.portChanged.connect(hotReloadPort)
-                pageLoader.item.shiftPointChanged.connect(hotReloadShiftPoint)
-            }
-        }
-    }
     function hotReloadPort(newPort) {
         console.log("Main Window: New port now...")
         ogPort = newPort
@@ -363,6 +351,18 @@ ApplicationWindow {
         anchors.margins: 10
 
         onClicked: pageLoader.source = "SettingsPage.qml"
+    }
+    // Settings Page Loader
+    Loader {
+        id: pageLoader
+        anchors.fill: parent
+        onItemChanged: {
+            if (pageLoader.item) {
+                // Connect to settings page signals
+                pageLoader.item.portChanged.connect(hotReloadPort)
+                pageLoader.item.shiftPointChanged.connect(hotReloadShiftPoint)
+            }
+        }
     }
     property var vFlags: []
     property int vGear: 0
