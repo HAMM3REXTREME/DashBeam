@@ -1,14 +1,13 @@
 # DashBeam
-### WORK IN PROGRESS
-Cross Platform BeamNG OutGauge UI.       
-## Usage
-Enable OutGauge protocol in BeamNG settings. Use the IP address of the device running DashBeam. You can find your IP address in the DashBeam settings.    
+### ALPHA SOFTWARE - MISSING FEATURES
+DashBeam is a dashboard app for BeamNG.Drive using the OutGauge protocol. 
+![Screenshot](https://github.com/HAMM3REXTREME/DashBeam/blob/master/assets/dashbeam.svg)     
+## Getting Started
+Enable OutGauge protocol in BeamNG settings. Use the IP address of the device running DashBeam. You can find your IP address in the DashBeam settings page.    
 ## Building
-Open the project in Qt Creator (Need Qt Quick 6.5 or above)    
+Open the project in Qt Creator (Need Qt Quick 6.5 or above) and build for either desktop or Android.    
 ## TODO   
-- Individual `signal`s when a setting is changed, in order to instantly apply the new setting instead of a needing a restart.    
-- More customizability, like options to change fonts, colors, or between metric and imperial units    
+- More customizability, for example options to change fonts, colors, tachometer/speedometer range or to switch between metric and imperial units.    
 - Multiple dashboard types (racecar-inspired etc.)    
-- Main menu to load a dashboard type.    
+- Main menu screen to load a dashboard type.    
 - Support for more/custom protocols? Will need a custom mod for BeamNG.Drive.   
-- Option to load a custom `.qml` file from a folder at runtime, to allow for user-made dashboard styles.    
