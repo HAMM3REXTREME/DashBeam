@@ -3,7 +3,7 @@
 ### ALPHA SOFTWARE - MISSING FEATURES
 
 
-![Screenshot](/home/hemanya/Development/DashbeamQT/DashBeam/assets/text_brand_dark.png)
+![Screenshot](https://github.com/HAMM3REXTREME/DashBeam/blob/master/assets/text_brand_dark.png)
 
 DashBeam is a dashboard app for BeamNG.Drive using the OutGauge protocol.
 
