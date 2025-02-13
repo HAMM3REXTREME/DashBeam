@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Shapes
 import QtQuick.Effects
+import QtQuick.Controls.Material
 
 ApplicationWindow {
     visible: true
@@ -9,7 +10,7 @@ ApplicationWindow {
     height: 720
     title: "DashBeam"
 
-    //Material.theme: Material.Dark
+    Material.theme: Material.Dark
     Component.onCompleted: {
         console.log("Main Window: Starting udpListener...")
         udpListener.setPort(ogPort)
@@ -17,6 +18,7 @@ ApplicationWindow {
     }
     onClosing: close => {
                    udpListener.stop()
+                   console.log("Main Window: Stopped udpListener. Bye...")
                }
     FontLoader {
         id: uiFont
@@ -52,8 +54,6 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.margins: 5
-                // For the layered items, you can assign a MultiEffect directly
-                // to layer.effect.
                 layer.effect: MultiEffect {
                     saturation: vThrottle == 1 ? 1.0 : -1.0
                     opacity: vThrottle == 1 ? 1.0 : 0.5
@@ -268,101 +268,34 @@ ApplicationWindow {
             }
         }
         ShiftLights {
-            visible: clShiftPoint > 0 ? true : vDashLights.includes("DL_SHIFT")
+            id: shiftLights
+            visible: showMultiLights ? (clShiftPoint > 0) : vDashLights.includes(
+                                           "DL_SHIFT")
             maxShiftPoint: clShiftPoint
             vehicleRpm: vRpm
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.margins: parent.height * 0.025
+            shiftSingleOn: !showMultiLights
+            numLeds: numShiftLeds
             shiftSingleNow: vShowLights.includes("DL_SHIFT")
         }
-        Rectangle {
-            width: parent.width / 16
-            height: parent.height / 8
+        RoundButton {
+            text: "Settings"
+            width: 100
+            height: 40
             radius: 5
-            color: "#00000012"
-            border.color: "#f0f0f0"
-            border.width: 1
             anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            anchors.margins: 5
-
-            Rectangle {
-                id: brakeBar
-                width: parent.width / 3 - parent.anchors.margins / 2
-                height: vBrake * (parent.height - 2 * parent.anchors.margins)
-                color: "#c0131a"
-                radius: 5
-                anchors.margins: 5
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    saturation: vBrake >= 1 ? 0.6 : 0.01
-                }
-            }
-
-            Rectangle {
-                id: clutchBar
-                width: parent.width / 3 - parent.anchors.margins / 2
-                height: vClutch * (parent.height - 2 * parent.anchors.margins)
-                color: "#1748c5"
-                radius: 5
-                anchors.margins: 5
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    saturation: vClutch >= 1 ? 0.6 : 0.01
-                }
-            }
-
-            Rectangle {
-                id: throttleBar
-                width: parent.width / 3 - parent.anchors.margins / 2
-                height: vThrottle * (parent.height - 2 * parent.anchors.margins)
-                color: "#0fa81e"
-                radius: 5
-                anchors.margins: 5
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    saturation: vThrottle >= 1 ? 0.6 : 0.01
-                }
-            }
+            anchors.left: parent.left
+            anchors.margins: 10
+            onClicked: settingsLoader.source = "SettingsPage.qml"
         }
     }
-    function hotReloadPort(newPort) {
-        console.log("Main Window: New port now...")
-        ogPort = newPort
-    }
-    function hotReloadShiftPoint(newShiftPoint) {
-        console.log("Main Window: New shift point now...")
-        clShiftPoint = newShiftPoint
-    }
-    RoundButton {
-        text: "Settings"
-        width: 100
-        height: 40
-        radius: 5
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.margins: 10
 
-        onClicked: pageLoader.source = "SettingsPage.qml"
-    }
     // Settings Page Loader
     Loader {
-        id: pageLoader
+        id: settingsLoader
         anchors.fill: parent
-        onItemChanged: {
-            if (pageLoader.item) {
-                // Connect to settings page signals
-                pageLoader.item.portChanged.connect(hotReloadPort)
-                pageLoader.item.shiftPointChanged.connect(hotReloadShiftPoint)
-            }
-        }
     }
     property var vFlags: []
     property int vGear: 0
@@ -379,11 +312,10 @@ ApplicationWindow {
     property real vClutch: 0.0
     property int vId: 0
     // Client side options
-    property real clShiftPoint: settingsManager.loadSetting("shiftPoint",
-                                                            "-1").toString()
-    property int numLeds: clShiftPoint > 0 ? 9 : 1
-    property int ogPort: settingsManager.loadSetting("ogPort",
-                                                     "4444").toString()
+    property real clShiftPoint: settingsManager.loadSetting("shiftPoint", -1.0)
+    property int numShiftLeds: settingsManager.loadSetting("numLeds", 9)
+    property int ogPort: settingsManager.loadSetting("ogPort", 4444)
+    property bool showMultiLights: settingsManager.loadSetting("isShift", false)
 
     // Connect to C++ signal for a packet
     Connections {
@@ -403,6 +335,22 @@ ApplicationWindow {
             vBrake = data.brake
             vClutch = data.clutch
             vId = data.id
+        }
+    }
+    Connections {
+        target: settingsManager
+        function onSettingChanged(key, value) {
+            if (key === "ogPort") {
+                ogPort = value
+                udpListener.setPort(ogPort)
+                udpListener.start()
+            } else if (key === "shiftPoint") {
+                clShiftPoint = value
+            } else if (key === "isShift") {
+                showMultiLights = value
+            } else if (key === "numLeds") {
+                numShiftLeds = value
+            }
         }
     }
 }

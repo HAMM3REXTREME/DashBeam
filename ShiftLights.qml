@@ -5,11 +5,13 @@ import QtQuick.Effects
 
 Rectangle {
     id: shiftLights
-    property bool shiftSingleNow: false // Only works when maxShiftPoint is not a natural number
+    property int numLeds: 9
+    property bool shiftSingleNow: false // Only works when shiftSingleOn
+    property bool shiftSingleOn: false
     property real maxShiftPoint: 9000
     property real vehicleRpm: 0
     height: 0.05 * parent.height
-    width: maxShiftPoint > 0 ? numLeds * height : 0.1 * parent.width
+    width: (shiftLights.numLeds > 1) ? numLeds * height : 0.1 * parent.width
     color: "#1F1F1F"
     radius: height / 5
     border.color: "#292929"
@@ -31,23 +33,23 @@ Rectangle {
         model: numLeds
         Rectangle {
             id: led
-            width: maxShiftPoint > 0 ? parent.height * 0.8 : parent.width * 0.8
+            width: (shiftLights.numLeds > 1) ? parent.height * 0.8 : parent.width * 0.8
             height: parent.height * 0.8
             radius: width / 2
             property bool isOn: false
             color: {
                 // Only for client side shift lights
-                if (maxShiftPoint > 0) {
+                if (!shiftSingleOn) {
                     // Yellows - default shade
                     let shadeOff = shiftLights.shadeOffMiddle
                     let shadeOn = shiftLights.shadeOnMiddle
                     // (numLeds-index) == (left --> 1,2,3,4,5,6,7,8,9 --> right)
-                    if ((numLeds - index) > 6) {
+                    if (index < shiftLights.numLeds/3) {
                         // Left lights = Green
                         shadeOff = shiftLights.shadeOffLow
                         shadeOn = shiftLights.shadeOnLow
                     }
-                    if ((numLeds - index) <= 3) {
+                    if (index >= 2*shiftLights.numLeds/3 | index+1 === shiftLights.numLeds) {
                         // Right lights = Red
                         shadeOn = shiftLights.shadeOnHigh
                         shadeOff = shiftLights.shadeOffHigh
@@ -65,15 +67,17 @@ Rectangle {
                 } else {
                     // BeamNG shift lights
                     if (shiftSingleNow) {
-                        return "#CF0404" // Red color when the shift light is shown
+                        isOn = true
+                        shiftLights.shadeOnHigh // Red color when the shift light is shown
                     } else {
-                        return "#1F0505" // Dark red if the shift light is not shown
+                        isOn = false
+                        shiftLights.shadeOffHigh // Dark red if the shift light is not shown
                     }
                 }
             }
             // Position each circle in a horizontal line
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width * 1.1)
+            anchors.horizontalCenterOffset: (index - (shiftLights.numLeds - 1) / 2) * (width * 1.1)
             anchors.verticalCenter: parent.verticalCenter
             border.color: "#252525"
             border.width: 1

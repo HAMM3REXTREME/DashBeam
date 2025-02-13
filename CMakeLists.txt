@@ -26,6 +26,7 @@ qt_add_qml_module(DashBeamApp
     RESOURCES assets/Aldrich-Regular.ttf assets/signal_l.svg assets/signal_r.svg assets/highbeam.svg assets/handbrake.svg assets/screen_topleft.svg assets/JetBrainsMono-Bold.ttf
     RESOURCES android/AndroidManifest.xml android/build.gradle android/res/values/libs.xml android/res/xml/qtprovider_paths.xml android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.properties android/gradle.properties android/gradlew android/gradlew.bat
     QML_FILES ShiftLights.qml
+    QML_FILES VerticalBar.qml
 
 )
 
