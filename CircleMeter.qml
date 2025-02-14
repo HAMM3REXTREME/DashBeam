@@ -17,7 +17,7 @@ Item {
     property int radius: 150
     property color backgroundColorInner: "#232323"
     property color backgroundColorOuter: "#2F2F2F"
-    property color screenBackground: "#202021"
+    property color screenBackground: "#242426"
     property color strokeColor: "#FFFFFF"
     property color tickColor: "#FFFFFF"
     property color tickColorRedline: "#FF0000"

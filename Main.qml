@@ -31,14 +31,14 @@ ApplicationWindow {
     Rectangle {
         width: parent.width
         height: parent.height
-        color: "#191919"
+        color: "#151515"
         anchors.centerIn: parent
 
         // Central display
         Rectangle {
             id: centerBox
             width: parent.width * 0.3
-            height: parent.height * 0.4
+            height: parent.height * 0.3
             color: "#060607"
             radius: 4
             anchors.centerIn: parent
@@ -68,47 +68,17 @@ ApplicationWindow {
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
             }
-            Rectangle {
+            ColorBar {
                 id: fuelBar
-                width: parent.width / 24
-                radius: parent.width / 24
-                height: (parent.height - 2 * anchors.margins)
-                color: "#29292912"
-                border.color: "white"
-                border.width: 1
-                anchors.margins: 10
+                horizontal: true
+                width: parent.width * 0.95
+                radius: 5
+                height: parent.height * 0.1
                 anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                Rectangle {
-                    width: parent.width - 2 * anchors.margins
-                    radius: parent.width
-                    height: vFuel * (parent.height - anchors.margins)
-                    color: "#00439c"
-                    anchors.margins: 2
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-            }
-            Rectangle {
-                id: oilBar
-                width: parent.width / 24
-                radius: parent.width / 24
-                height: (parent.height - 2 * anchors.margins)
-                color: "#29292912"
-                border.color: "white"
-                border.width: 1
-                anchors.margins: 10
-                anchors.bottom: parent.bottom
-                anchors.right: fuelBar.left
-                Rectangle {
-                    width: parent.width - 2 * anchors.margins
-                    radius: parent.width
-                    height: (vEngTemp / 175) * (parent.height - anchors.margins)
-                    color: "#b00b1e"
-                    anchors.margins: 2
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.margins: 5
+                value: vFuel
+                fillColor: "#32389f"
             }
         }
 
@@ -279,6 +249,51 @@ ApplicationWindow {
             shiftSingleOn: !showMultiLights
             numLeds: numShiftLeds
             shiftSingleNow: vShowLights.includes("DL_SHIFT")
+        }
+        // Pedal inputs
+        Rectangle {
+            color: "#1F1F1F"
+            width: 0.075 * parent.width
+            height: 0.15 * parent.height
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            border.color: "#292929"
+            border.width: 1
+            radius: 5
+            anchors.margins: 10
+            ColorBar {
+                id: clutchBar
+                width: parent.width / 4
+                radius: 5
+                height: parent.height * 0.9
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.margins: 5
+                value: vClutch
+                fillColor: "#23319f"
+            }
+            ColorBar {
+                id: brakeBar
+                width: parent.width / 4
+                radius: 5
+                height: parent.height * 0.9
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.margins: 5
+                value: vBrake
+                fillColor: "#9f2831"
+            }
+            ColorBar {
+                id: throttleBar
+                width: parent.width / 4
+                radius: 5
+                height: parent.height * 0.9
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                anchors.margins: 5
+                value: vThrottle
+                fillColor: "#239f21"
+            }
         }
         RoundButton {
             text: "Settings"
