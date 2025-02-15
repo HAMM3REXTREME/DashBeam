@@ -21,11 +21,9 @@ Item {
         Rectangle {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.margins: 10
-            radius: 5
             color: "#212121"
-            width: parent.width * 0.99
-            height: parent.height * 0.9
+            width: parent.width
+            height: parent.height - 1.5*backButton.height
             Flickable {
                 id: flickable
                 anchors.fill: parent
@@ -251,6 +249,7 @@ Item {
             }
         }
         RoundButton {
+            id: backButton
             text: "Back"
             width: 80
             height: 40

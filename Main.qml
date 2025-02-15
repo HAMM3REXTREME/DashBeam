@@ -38,7 +38,7 @@ ApplicationWindow {
         Rectangle {
             id: centerBox
             width: parent.width * 0.3
-            height: parent.height * 0.3
+            height: parent.height * 0.4
             color: "#060607"
             radius: 4
             anchors.centerIn: parent
@@ -60,10 +60,23 @@ ApplicationWindow {
                 }
             }
             Text {
+                id: gearText
                 anchors.centerIn: parent
                 text: (vGear - 1).toString()
                 color: "white"
                 font.pixelSize: parent.height / 2
+                font.family: uiFont.name
+                wrapMode: Text.Wrap
+                horizontalAlignment: Text.AlignHCenter
+            }
+            Text {
+                id: fuelText
+                anchors.left: parent.left
+                anchors.bottom: fuelBar.top
+                text: "Fuel"
+                anchors.leftMargin: 10
+                color: "white"
+                font.pixelSize: parent.height / 18
                 font.family: uiFont.name
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
@@ -73,12 +86,36 @@ ApplicationWindow {
                 horizontal: true
                 width: parent.width * 0.95
                 radius: 5
-                height: parent.height * 0.1
-                anchors.bottom: parent.bottom
+                height: parent.height * 0.02
+                anchors.bottom: coolantText.top
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.margins: 5
                 value: vFuel
                 fillColor: "#32389f"
+            }
+            Text {
+                id: coolantText
+                anchors.left: parent.left
+                anchors.bottom: coolantBar.top
+                text: "Coolant Temp"
+                anchors.leftMargin: 10
+                color: "white"
+                font.pixelSize: parent.height / 18
+                font.family: uiFont.name
+                wrapMode: Text.Wrap
+                horizontalAlignment: Text.AlignHCenter
+            }
+            ColorBar {
+                id: coolantBar
+                horizontal: true
+                width: parent.width * 0.95
+                radius: 5
+                height: parent.height * 0.02
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.margins: 5
+                value: vEngTemp/180
+                fillColor: "#9f3244"
             }
         }
 
