@@ -10,9 +10,6 @@ Item {
     width: 1280
     height: 720
     Material.theme: Material.Dark
-    property real clShiftPoint: settingsManager.loadSetting("shiftPoint", -1.0)
-    property int ogPort: settingsManager.loadSetting("ogPort", 4444)
-    property int numLeds: settingsManager.loadSetting("numLeds", 9)
     Rectangle {
         width: parent.width
         height: parent.height
@@ -56,7 +53,7 @@ Item {
                     Row {
                         TextField {
                             id: portInput
-                            text: ogPort.toString()
+                            text: AppSettings.ogPort.toString()
                             placeholderText: "Port"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -80,14 +77,13 @@ Item {
                                 if (!(port && port > 0 && port <= 65535)) {
                                     console.log("Settings: Invalid port number.")
                                     return false
-                                } else if (port === ogPort) {
+                                } else if (port === AppSettings.ogPort) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                ogPort = parseInt(portInput.text)
-                                settingsManager.saveSetting("ogPort", ogPort)
+                                AppSettings.ogPort = parseInt(portInput.text)
                             }
                         }
                     }
@@ -99,7 +95,7 @@ Item {
                     Row {
                         TextField {
                             id: inputShiftPoint
-                            text: clShiftPoint.toString()
+                            text: AppSettings.clShiftPoint.toString()
                             placeholderText: "RPM"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -123,27 +119,26 @@ Item {
                                 if (!isFinite(newShift)) {
                                     console.log("Settings: Invalid redline value.")
                                     return false
-                                } else if (newShift === clShiftPoint) {
+                                } else if (newShift === AppSettings.clShiftPoint) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                clShiftPoint = parseFloat(inputShiftPoint.text)
-                                settingsManager.saveSetting("shiftPoint",
-                                                            clShiftPoint)
+                                AppSettings.clShiftPoint = parseFloat(inputShiftPoint.text)
+
                             }
                         }
                     }
                     Text {
-                        text: "Number of LEDs on shifter"
+                        text: "Number of LEDs on shift bar"
                         color: "white"
                         font.pixelSize: 16
                     }
                     Row {
                         TextField {
                             id: inputNumleds
-                            text: numLeds.toString()
+                            text: AppSettings.numShiftLeds.toString()
                             placeholderText: "LEDs"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -164,19 +159,47 @@ Item {
                             height: 40
                             enabled: {
                                 var newLeds = parseInt(inputNumleds.text)
-                                if (newLeds < 1) {
+                                if (newLeds < 1 | newLeds > 128) {
                                     console.log("Settings: Invalid number of lights.")
                                     return false
-                                } else if (newLeds === numLeds) {
+                                } else if (newLeds === AppSettings.numShiftLeds) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                numLeds = parseInt(inputNumleds.text)
-                                settingsManager.saveSetting("numLeds",
-                                                            numLeds)
+                                AppSettings.numShiftLeds = parseInt(inputNumleds.text)
                             }
+                        }
+                    }
+                    ColorDialog {
+                        id: colorDialog
+                        selectedColor: AppSettings.shiftLightAllColor
+                        onAccepted: {AppSettings.shiftLightAllColor = selectedColor
+                        }
+
+                    }
+                    ShiftLights{
+                        height: parent.height * 0.05
+                        maxShiftPoint: AppSettings.clShiftPoint
+                        vehicleRpm: dummyRpmSlide.value
+                        numLeds: AppSettings.numShiftLeds
+                        shadeAll: AppSettings.shiftLightAllColor
+                    }
+                    Slider {
+                        id: dummyRpmSlide
+                        from: 0
+                        value: AppSettings.clShiftPoint
+                        to: AppSettings.clShiftPoint
+                    }
+                    RoundButton {
+                        text: "Change shift point color"
+                        width: 160
+                        radius: 10
+                        height: 40
+                        enabled: true
+                        onClicked: {
+                            colorDialog.open()
                         }
                     }
                     Text {
@@ -187,10 +210,9 @@ Item {
                     CheckBox {
                         id: multiShiftCheck
                         text: "Always show client-side multicolored shift lights"
-                        checked: settingsManager.loadSetting("isShift", false)
+                        checked: AppSettings.showMultiLights
                         onCheckedChanged: {
-                            settingsManager.saveSetting("isShift", checked)
-                                                        console.log(settingsManager.loadSetting("isShift", false))
+                            AppSettings.showMultiLights = checked
                         }
                     }
                     Text {
@@ -229,6 +251,7 @@ Item {
                             color: "#FFFFFF"
                         }
                         MouseArea {
+                            id: ipRevealer
                             anchors.fill: parent
                             onClicked: {
                                 ipText.visible = !ipText.visible
@@ -237,10 +260,11 @@ Item {
                         }
                     }
                     Text {
-                        text: "DashBeam alpha build"
+                        text: "DashBeam development preview"
                         color: "white"
                         font.pixelSize: 12
                     }
+                    // Add some scrollability
                     Item {
                         width: 1
                         height: flickable.height / 2 // Ensures smooth scrolling
