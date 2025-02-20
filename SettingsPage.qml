@@ -5,7 +5,7 @@ import QtQuick.Effects
 import QtQuick.Dialogs
 import QtQuick.Controls.Material
 
-// Must be loaded with Loaded with id: settingsLoader
+// Must be loaded with Loader { id: settingsLoader }
 Item {
     visible: true
     width: 1280
@@ -197,7 +197,7 @@ Item {
                     }
                     RoundButton {
                         text: "Change shift point color"
-                        width: 160
+                        width: 200
                         radius: 10
                         height: 40
                         enabled: true
