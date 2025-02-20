@@ -4,13 +4,24 @@ import QtQuick.Controls
 import QtQuick.Shapes
 import QtQuick.Effects
 import QtQuick.Controls.Material
+
 ApplicationWindow {
     id: root
     visible: true
     width: 1280
     height: 720
     title: "DashBeam"
+    Material.theme: Material.Dark
 
+    Component.onCompleted: {
+        console.log("Main Window: Starting carListener...")
+        carListener.setPort(AppSettings.listenPort)
+        carListener.start()
+    }
+    onClosing: close => {
+                   carListener.stop()
+                   console.log("Main Window: Stopped carListener. Bye...")
+               }
     Settings {
         category: "MainWindow"
         property alias x: root.x
@@ -19,16 +30,6 @@ ApplicationWindow {
         property alias height: root.height
     }
 
-    Material.theme: Material.Dark
-    Component.onCompleted: {
-        console.log("Main Window: Starting carListener...")
-        carListener.setPort(AppSettings.ogPort)
-        carListener.start()
-    }
-    onClosing: close => {
-                   carListener.stop()
-                   console.log("Main Window: Stopped carListener. Bye...")
-               }
     FontLoader {
         id: uiFont
         source: "assets/Aldrich-Regular.ttf"
@@ -83,7 +84,7 @@ ApplicationWindow {
                 id: fuelText
                 anchors.left: parent.left
                 anchors.bottom: fuelBar.top
-                text: "Fuel"
+                text: "Fuel: " + (carListener.vehicleFuel * 100).toFixed() + "%"
                 anchors.leftMargin: 10
                 color: "white"
                 font.pixelSize: parent.height / 18
@@ -100,14 +101,15 @@ ApplicationWindow {
                 anchors.bottom: coolantText.top
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.margins: 5
-                value: vFuel
+                value: carListener.vehicleFuel
                 fillColor: "#32389f"
             }
             Text {
                 id: coolantText
                 anchors.left: parent.left
                 anchors.bottom: coolantBar.top
-                text: "Coolant Temp"
+                text: "Coolant Temp: " + carListener.vehicleEngTemp.toFixed(
+                          ) + "°C"
                 anchors.leftMargin: 10
                 color: "white"
                 font.pixelSize: parent.height / 18
@@ -124,7 +126,7 @@ ApplicationWindow {
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.margins: 5
-                value: vEngTemp/180
+                value: carListener.vehicleEngTemp / 180
                 fillColor: "#9f3244"
             }
         }
@@ -151,8 +153,9 @@ ApplicationWindow {
             labelFontColor: "#FE8000"
             backgroundColorInner: carListener.vehicleShowLights.includes(
                                       "DL_SHIFT") ? "#392424" : "#242424"
-            redline: AppSettings.clShiftPoint > 0 ? AppSettings.clShiftPoint / 1000 : 99999.9
-            middleText: "<h1><b>" + carListener.vehicleRpm.toFixed() + "</b></h1>RPM"
+            redline: AppSettings.vRedline > 0 ? AppSettings.vRedline / 1000 : 99999.9
+            middleText: "<h1><b>" + carListener.vehicleRpm.toFixed(
+                            ) + "</b></h1>RPM"
             middleFontSize: radius / 8
             middleFontName: circleFont.name
         }
@@ -178,7 +181,8 @@ ApplicationWindow {
             longTickEvery: 5
             tickFontName: uiFont.name
             redline: 280
-            middleText: "<h1><b>" + carListener.vehicleSpeed.toFixed() + "</b></h1>km/h"
+            middleText: "<h1><b>" + carListener.vehicleSpeed.toFixed(
+                            ) + "</b></h1>km/h"
             middleFontSize: radius / 8
             middleFontName: circleFont.name
         }
@@ -208,7 +212,8 @@ ApplicationWindow {
             tickFontName: uiFont.name
             needleWidth: radius / 20
             labelFontSize: radius / 8
-            middleText: "<h1><b>" + carListener.vehicleTurbo.toFixed(2) + "</b></h1>bar"
+            middleText: "<h1><b>" + carListener.vehicleTurbo.toFixed(
+                            2) + "</b></h1>bar"
             middleFontSize: radius / 8
             middleFontName: circleFont.name
         }
@@ -234,8 +239,10 @@ ApplicationWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
                 layer.effect: MultiEffect {
-                    saturation: carListener.vehicleShowLights.includes("DL_SIGNAL_L") ? 1.0 : -1.0
-                    opacity: carListener.vehicleShowLights.includes("DL_SIGNAL_L") ? 1.0 : 0.5
+                    saturation: carListener.vehicleShowLights.includes(
+                                    "DL_SIGNAL_L") ? 1.0 : -1.0
+                    opacity: carListener.vehicleShowLights.includes(
+                                 "DL_SIGNAL_L") ? 1.0 : 0.5
                 }
             }
             Image {
@@ -248,8 +255,10 @@ ApplicationWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
                 layer.effect: MultiEffect {
-                    saturation: carListener.vehicleShowLights.includes("DL_FULLBEAM") ? 1.0 : -1.0
-                    opacity: carListener.vehicleShowLights.includes("DL_FULLBEAM") ? 1.0 : 0.5
+                    saturation: carListener.vehicleShowLights.includes(
+                                    "DL_FULLBEAM") ? 1.0 : -1.0
+                    opacity: carListener.vehicleShowLights.includes(
+                                 "DL_FULLBEAM") ? 1.0 : 0.5
                 }
             }
             Image {
@@ -264,7 +273,8 @@ ApplicationWindow {
                 layer.effect: MultiEffect {
                     saturation: carListener.vehicleShowLights.includes(
                                     "DL_HANDBRAKE") ? 1.0 : -1.0
-                    opacity: carListener.vehicleShowLights.includes("DL_HANDBRAKE") ? 1.0 : 0.5
+                    opacity: carListener.vehicleShowLights.includes(
+                                 "DL_HANDBRAKE") ? 1.0 : 0.5
                 }
             }
             Image {
@@ -279,24 +289,26 @@ ApplicationWindow {
                 // For the layered items, you can assign a MultiEffect directly
                 // to layer.effect.
                 layer.effect: MultiEffect {
-                    saturation: carListener.vehicleShowLights.includes("DL_SIGNAL_R") ? 1.0 : -1.0
-                    opacity: carListener.vehicleShowLights.includes("DL_SIGNAL_R") ? 1.0 : 0.5
+                    saturation: carListener.vehicleShowLights.includes(
+                                    "DL_SIGNAL_R") ? 1.0 : -1.0
+                    opacity: carListener.vehicleShowLights.includes(
+                                 "DL_SIGNAL_R") ? 1.0 : 0.5
                 }
             }
         }
         ShiftLights {
             id: shiftLights
-            visible: showMultiLights ? (clShiftPoint > 0) : vDashLights.includes(
-                                           "DL_SHIFT")
-            maxShiftPoint: AppSettings.clShiftPoint
+            visible: AppSettings.enableClientLights ? (AppSettings.vRedline > 0) : carListener.vehicleDashLights.includes(
+                                                          "DL_SHIFT")
+            maxShiftPoint: AppSettings.vRedline
             vehicleRpm: carListener.vehicleRpm
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.margins: parent.height * 0.025
-            shiftSingleOn: !showMultiLights
-            numLeds: AppSettings.numShiftLeds
+            shiftSingleOn: !AppSettings.enableClientLights
+            numLeds: AppSettings.shiftLightCount
             shiftSingleNow: carListener.vehicleShowLights.includes("DL_SHIFT")
-            shadeAll: AppSettings.shiftLightAllColor
+            shadeAll: AppSettings.shiftLightColorAll
         }
         // Pedal inputs
         Rectangle {

@@ -5,6 +5,7 @@ import QtQuick.Effects
 import QtQuick.Dialogs
 import QtQuick.Controls.Material
 
+// Must be loaded with Loaded with id: settingsLoader
 Item {
     visible: true
     width: 1280
@@ -20,7 +21,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             color: "#212121"
             width: parent.width
-            height: parent.height - 1.5*backButton.height
+            height: parent.height - 1.5 * backButton.height
             Flickable {
                 id: flickable
                 anchors.fill: parent
@@ -53,7 +54,7 @@ Item {
                     Row {
                         TextField {
                             id: portInput
-                            text: AppSettings.ogPort.toString()
+                            text: AppSettings.listenPort.toString()
                             placeholderText: "Port"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -77,13 +78,14 @@ Item {
                                 if (!(port && port > 0 && port <= 65535)) {
                                     console.log("Settings: Invalid port number.")
                                     return false
-                                } else if (port === AppSettings.ogPort) {
+                                } else if (port === AppSettings.listenPort) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                AppSettings.ogPort = parseInt(portInput.text)
+                                AppSettings.listenPort = parseInt(
+                                            portInput.text)
                             }
                         }
                     }
@@ -95,7 +97,7 @@ Item {
                     Row {
                         TextField {
                             id: inputShiftPoint
-                            text: AppSettings.clShiftPoint.toString()
+                            text: AppSettings.vRedline.toString()
                             placeholderText: "RPM"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -119,14 +121,14 @@ Item {
                                 if (!isFinite(newShift)) {
                                     console.log("Settings: Invalid redline value.")
                                     return false
-                                } else if (newShift === AppSettings.clShiftPoint) {
+                                } else if (newShift === AppSettings.vRedline) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                AppSettings.clShiftPoint = parseFloat(inputShiftPoint.text)
-
+                                AppSettings.vRedline = parseFloat(
+                                            inputShiftPoint.text)
                             }
                         }
                     }
@@ -138,7 +140,7 @@ Item {
                     Row {
                         TextField {
                             id: inputNumleds
-                            text: AppSettings.numShiftLeds.toString()
+                            text: AppSettings.shiftLightCount.toString()
                             placeholderText: "LEDs"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -162,35 +164,36 @@ Item {
                                 if (newLeds < 1 | newLeds > 128) {
                                     console.log("Settings: Invalid number of lights.")
                                     return false
-                                } else if (newLeds === AppSettings.numShiftLeds) {
+                                } else if (newLeds === AppSettings.shiftLightCount) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                AppSettings.numShiftLeds = parseInt(inputNumleds.text)
+                                AppSettings.shiftLightCount = parseInt(
+                                            inputNumleds.text)
                             }
                         }
                     }
                     ColorDialog {
                         id: colorDialog
-                        selectedColor: AppSettings.shiftLightAllColor
-                        onAccepted: {AppSettings.shiftLightAllColor = selectedColor
+                        selectedColor: AppSettings.shiftLightColorAll
+                        onAccepted: {
+                            AppSettings.shiftLightColorAll = selectedColor
                         }
-
                     }
-                    ShiftLights{
+                    ShiftLights {
                         height: parent.height * 0.05
-                        maxShiftPoint: AppSettings.clShiftPoint
+                        maxShiftPoint: AppSettings.vRedline
                         vehicleRpm: dummyRpmSlide.value
-                        numLeds: AppSettings.numShiftLeds
-                        shadeAll: AppSettings.shiftLightAllColor
+                        numLeds: AppSettings.shiftLightCount
+                        shadeAll: AppSettings.shiftLightColorAll
                     }
                     Slider {
                         id: dummyRpmSlide
                         from: 0
-                        value: AppSettings.clShiftPoint
-                        to: AppSettings.clShiftPoint
+                        value: AppSettings.vRedline
+                        to: AppSettings.vRedline
                     }
                     RoundButton {
                         text: "Change shift point color"
@@ -210,9 +213,9 @@ Item {
                     CheckBox {
                         id: multiShiftCheck
                         text: "Always show client-side multicolored shift lights"
-                        checked: AppSettings.showMultiLights
+                        checked: AppSettings.enableClientLights
                         onCheckedChanged: {
-                            AppSettings.showMultiLights = checked
+                            AppSettings.enableClientLights = checked
                         }
                     }
                     Text {
