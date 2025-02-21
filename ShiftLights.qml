@@ -10,8 +10,10 @@ Rectangle {
     property bool shiftSingleOn: false
     property real maxShiftPoint: 9000
     property real vehicleRpm: 0
+    property real widthFactor: 4
+    property real lightRadiusFactor: 25
     height: 0.05 * parent.height
-    width: (shiftLights.numLeds > 1) ? numLeds * height : 0.1 * parent.width
+    width: (shiftLights.numLeds > 1) ? widthFactor * numLeds * height : 0.1 * parent.width
     color: "#1F1F1F"
     radius: height / 5
     border.color: "#292929"
@@ -33,9 +35,10 @@ Rectangle {
         model: numLeds
         Rectangle {
             id: led
-            width: (shiftLights.numLeds > 1) ? parent.height * 0.8 : parent.width * 0.8
+            width: (numLeds > 1) ? widthFactor * parent.height
+                                               * 0.8 : parent.width * 0.8
             height: parent.height * 0.8
-            radius: width / 2
+            radius: width / lightRadiusFactor
             property bool isOn: false
             color: {
                 // Only for client side shift lights
@@ -43,13 +46,12 @@ Rectangle {
                     // Yellows - default shade
                     let shadeOff = shiftLights.shadeOffMiddle
                     let shadeOn = shiftLights.shadeOnMiddle
-                    // (numLeds-index) == (left --> 1,2,3,4,5,6,7,8,9 --> right)
-                    if (index < shiftLights.numLeds/3) {
+                    if (index < shiftLights.numLeds / 3) {
                         // Left lights = Green
                         shadeOff = shiftLights.shadeOffLow
                         shadeOn = shiftLights.shadeOnLow
                     }
-                    if (index >= 2*shiftLights.numLeds/3 | index+1 === shiftLights.numLeds) {
+                    if (index >= 2 * shiftLights.numLeds / 3 | index + 1 === shiftLights.numLeds) {
                         // Right lights = Red
                         shadeOn = shiftLights.shadeOnHigh
                         shadeOff = shiftLights.shadeOffHigh
@@ -57,6 +59,7 @@ Rectangle {
                     if (vehicleRpm >= maxShiftPoint) {
                         shadeOn = shiftLights.shadeAll // SHIFT NOW type color
                     }
+                    // (numLeds-index) == (left --> 1,2,3,4,5,6,7,8,9 --> right)
                     if (vehicleRpm >= (maxShiftPoint - (numLeds - index) * lightRpmStep)) {
                         isOn = true
                         return shadeOn
@@ -75,9 +78,9 @@ Rectangle {
                     }
                 }
             }
-            // Position each circle in a horizontal line
+            // Position each circle in a horizontal line (rtl)
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: (index - (shiftLights.numLeds - 1) / 2) * (width * 1.1)
+            anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width * 1.1)
             anchors.verticalCenter: parent.verticalCenter
             border.color: "#252525"
             border.width: 1
