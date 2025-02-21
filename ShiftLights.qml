@@ -7,15 +7,17 @@ Rectangle {
     id: shiftLights
     property int numLeds: 9
     property bool shiftSingleNow: false // Only works when shiftSingleOn
-    property bool shiftSingleOn: false
+    property bool shiftSingleOn: false // Show single light that doesnt depend on rpm, just set by boolean.
     property real maxShiftPoint: 9000
     property real vehicleRpm: 0
-    property real widthFactor: 4
-    property real lightRadiusFactor: 25
-    height: 0.05 * parent.height
-    width: (shiftLights.numLeds > 1) ? widthFactor * numLeds * height : 0.1 * parent.width
+    property real lightAspect: 1 // Aspect ratio of lights, <1 looks like "|" and >1 looks like "-"
+    property real lightRadiusFactor: 0.5 // Rounding radius factor, 0 = no rounding, 0.5 = pill shape/circle
+    property bool forceLightAspect: true // Force light aspect, or simply use parent width and height for the lights
+    property bool isVertical: false // Makes lights stack vertically instead
+    height: 50
+    width: 500
     color: "#1F1F1F"
-    radius: height / 5
+    radius: (forceLightAspect ? (lightAspect * height) : width * 0.8 / numLeds) * lightRadiusFactor
     border.color: "#292929"
     border.width: 1
     // This part: ---______
@@ -32,13 +34,17 @@ Rectangle {
     property real lightRpmStep: 100
     // Repeater to create an array of shift lights
     Repeater {
+        id: ledRepeater
         model: numLeds
         Rectangle {
             id: led
-            width: (numLeds > 1) ? widthFactor * parent.height
-                                               * 0.8 : parent.width * 0.8
-            height: parent.height * 0.8
-            radius: width / lightRadiusFactor
+            width: forceLightAspect ? (lightAspect * height) : parent.width
+                                      * 0.8 / (isVertical ? 1 : numLeds)
+            height: forceLightAspect ? Math.min(
+                                           parent.width * 0.8 / (numLeds * lightAspect),
+                                           (parent.height * 0.8)
+                                           / (isVertical ? numLeds : 1)) : parent.height * 0.8
+            radius: width * lightRadiusFactor
             property bool isOn: false
             color: {
                 // Only for client side shift lights
@@ -80,8 +86,11 @@ Rectangle {
             }
             // Position each circle in a horizontal line (rtl)
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width * 1.1)
+            anchors.horizontalCenterOffset: isVertical ? 0 : (index - (numLeds - 1)
+                                                              / 2) * (width * 1.1)
             anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: isVertical ? (((numLeds - 1) / 2) - index)
+                                                       * (height * 1.1) : 0
             border.color: "#252525"
             border.width: 1
             layer.enabled: true
