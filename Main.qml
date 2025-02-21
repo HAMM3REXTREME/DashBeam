@@ -22,6 +22,7 @@ ApplicationWindow {
                    carListener.stop()
                    console.log("Main Window: Stopped carListener. Bye...")
                }
+
     Settings {
         category: "MainWindow"
         property alias x: root.x
@@ -38,6 +39,7 @@ ApplicationWindow {
         id: circleFont
         source: "assets/JetBrainsMono-Bold.ttf"
     }
+
     Rectangle {
         id: backRect
         width: parent.width
@@ -45,7 +47,6 @@ ApplicationWindow {
         color: "#151515"
         anchors.centerIn: parent
 
-        // Central display
         Rectangle {
             id: centerBox
             width: parent.width * 0.3
@@ -67,7 +68,7 @@ ApplicationWindow {
                 anchors.margins: 5
                 layer.effect: MultiEffect {
                     saturation: carListener.vehicleThrottle === 1 ? 1.0 : -1.0
-                    opacity: carListener.vehicleThrottle === 1 ? 1.0 : 0.5
+                    opacity: carListener.vehicleThrottle === 1 ? 0.75 : 0.25
                 }
             }
             Text {
@@ -169,7 +170,7 @@ ApplicationWindow {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            needleValue: carListener.vehicleSpeed
+            needleValue: carListener.vehicleSpeed * 3.6 // m/s --> km/h
             tickStep: 2
             tickCount: 151 // 75% + 1 for 3/4 quarters
             tickDivide: 200
@@ -181,7 +182,7 @@ ApplicationWindow {
             longTickEvery: 5
             tickFontName: uiFont.name
             redline: 280
-            middleText: "<h1><b>" + carListener.vehicleSpeed.toFixed(
+            middleText: "<h1><b>" + (carListener.vehicleSpeed* 3.6).toFixed(
                             ) + "</b></h1>km/h"
             middleFontSize: radius / 8
             middleFontName: circleFont.name
@@ -230,7 +231,7 @@ ApplicationWindow {
             border.color: "#292929"
             border.width: 1
             Image {
-                id: sourceItemL
+                id: turnSignalLeft
                 source: "assets/signal_l.svg"
                 layer.enabled: true
                 width: parent.height - 15
@@ -246,14 +247,15 @@ ApplicationWindow {
                 }
             }
             Image {
-                id: highbeamImg
+                id: highbeamOn
                 source: "assets/highbeam.svg"
                 layer.enabled: true
                 width: parent.height - 15
                 height: parent.height - 15
-                anchors.left: sourceItemL.right
+                anchors.left: turnSignalLeft.right
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
+                // TODO: All the icons should be the same shade of grey when off.
                 layer.effect: MultiEffect {
                     saturation: carListener.vehicleShowLights.includes(
                                     "DL_FULLBEAM") ? 1.0 : -1.0
@@ -267,7 +269,7 @@ ApplicationWindow {
                 layer.enabled: true
                 width: parent.height - 15
                 height: parent.height - 15
-                anchors.right: sourceItemR.left
+                anchors.right: turnSignalRight.left
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
                 layer.effect: MultiEffect {
@@ -278,7 +280,7 @@ ApplicationWindow {
                 }
             }
             Image {
-                id: sourceItemR
+                id: turnSignalRight
                 source: "assets/signal_r.svg"
                 layer.enabled: true
                 width: parent.height - 15
@@ -286,8 +288,6 @@ ApplicationWindow {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
-                // For the layered items, you can assign a MultiEffect directly
-                // to layer.effect.
                 layer.effect: MultiEffect {
                     saturation: carListener.vehicleShowLights.includes(
                                     "DL_SIGNAL_R") ? 1.0 : -1.0
@@ -298,6 +298,9 @@ ApplicationWindow {
         }
         ShiftLights {
             id: shiftLights
+            height: 0.05 * parent.height
+            width: 0.025 * numLeds * parent.width * lightAspect
+            lightAspect: AppSettings.shiftLightAspect
             visible: AppSettings.enableClientLights ? (AppSettings.vRedline > 0) : carListener.vehicleDashLights.includes(
                                                           "DL_SHIFT")
             maxShiftPoint: AppSettings.vRedline
@@ -310,11 +313,11 @@ ApplicationWindow {
             shiftSingleNow: carListener.vehicleShowLights.includes("DL_SHIFT")
             shadeAll: AppSettings.shiftLightColorAll
         }
-        // Pedal inputs
         Rectangle {
+            id: pedalDisplay
             color: "#1F1F1F"
-            width: 0.075 * parent.width
-            height: 0.15 * parent.height
+            width: Math.min(0.075 * parent.width,0.15 * parent.height)
+            height: Math.min(0.075 * parent.width,0.15 * parent.height)
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             border.color: "#292929"

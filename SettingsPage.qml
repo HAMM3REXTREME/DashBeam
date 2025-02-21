@@ -161,7 +161,7 @@ Item {
                             height: 40
                             enabled: {
                                 var newLeds = parseInt(inputNumleds.text)
-                                if (newLeds < 1 | newLeds > 128) {
+                                if (newLeds < 1 | newLeds > 512) {
                                     console.log("Settings: Invalid number of lights.")
                                     return false
                                 } else if (newLeds === AppSettings.shiftLightCount) {
@@ -175,6 +175,50 @@ Item {
                             }
                         }
                     }
+                    Text {
+                        text: "Shift Light LEDs aspect ratio"
+                        color: "white"
+                        font.pixelSize: 16
+                    }
+                    Row {
+                        TextField {
+                            id: inputLightAspect
+                            text: AppSettings.shiftLightAspect.toString()
+                            placeholderText: "Ratio"
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            width: 100
+                            height: 40
+                            color: "#FFFFFF"
+                            placeholderTextColor: "#A0A0A0"
+                            background: Rectangle {
+                                color: "#333333"
+                                radius: 10
+                                border.color: "#555555"
+                                border.width: 2
+                            }
+                        }
+                        RoundButton {
+                            text: "Set"
+                            width: 80
+                            radius: 10
+                            height: 40
+                            enabled: {
+                                var newAspect = parseFloat(
+                                            inputLightAspect.text)
+                                if (!isFinite(newAspect)) {
+                                    console.log("Settings: Invalid shift light aspect value.")
+                                    return false
+                                } else if (newAspect === AppSettings.shiftLightAspect) {
+                                    return false
+                                }
+                                return true
+                            }
+                            onClicked: {
+                                AppSettings.shiftLightAspect = parseFloat(
+                                            inputLightAspect.text)
+                            }
+                        }
+                    }
                     ColorDialog {
                         id: colorDialog
                         selectedColor: AppSettings.shiftLightColorAll
@@ -183,11 +227,14 @@ Item {
                         }
                     }
                     ShiftLights {
-                        height: parent.height * 0.05
+                        height: 0.05 * parent.height
+                        width: 0.025 * numLeds * parent.width * lightAspect
+                        shiftSingleOn: !AppSettings.enableClientLights
                         maxShiftPoint: AppSettings.vRedline
                         vehicleRpm: dummyRpmSlide.value
                         numLeds: AppSettings.shiftLightCount
                         shadeAll: AppSettings.shiftLightColorAll
+                        lightAspect: AppSettings.shiftLightAspect
                     }
                     Slider {
                         id: dummyRpmSlide

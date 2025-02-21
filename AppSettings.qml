@@ -11,4 +11,5 @@ Settings {
     property int listenPort: 4444
     property bool enableClientLights: true
     property color shiftLightColorAll: "#E807BB"
+    property real shiftLightAspect: 3
 }
