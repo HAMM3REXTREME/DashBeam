@@ -109,8 +109,7 @@ ApplicationWindow {
                 id: coolantText
                 anchors.left: parent.left
                 anchors.bottom: coolantBar.top
-                text: "Coolant Temp: " + carListener.vehicleEngTemp.toFixed(
-                          ) + "°C"
+                text: "Coolant Temp: " + carListener.vehicleEngTemp.toFixed() + "°C"
                 anchors.leftMargin: 10
                 color: "white"
                 font.pixelSize: parent.height / 18
@@ -152,11 +151,9 @@ ApplicationWindow {
             tickColor: "#FE8000"
             strokeColor: "#FE8000"
             labelFontColor: "#FE8000"
-            backgroundColorInner: carListener.vehicleShowLights.includes(
-                                      "DL_SHIFT") ? "#392424" : "#242424"
+            backgroundColorInner: carListener.vehicleShowLights.includes("DL_SHIFT") ? "#392424" : "#242424"
             redline: AppSettings.vRedline > 0 ? AppSettings.vRedline / 1000 : 99999.9
-            middleText: "<h1><b>" + carListener.vehicleRpm.toFixed(
-                            ) + "</b></h1>RPM"
+            middleText: "<h1><b>" + carListener.vehicleRpm.toFixed() + "</b></h1>RPM"
             middleFontSize: radius / 8
             middleFontName: circleFont.name
         }
@@ -182,8 +179,7 @@ ApplicationWindow {
             longTickEvery: 5
             tickFontName: uiFont.name
             redline: 280
-            middleText: "<h1><b>" + (carListener.vehicleSpeed* 3.6).toFixed(
-                            ) + "</b></h1>km/h"
+            middleText: "<h1><b>" + (carListener.vehicleSpeed * 3.6).toFixed() + "</b></h1>km/h"
             middleFontSize: radius / 8
             middleFontName: circleFont.name
         }
@@ -213,8 +209,7 @@ ApplicationWindow {
             tickFontName: uiFont.name
             needleWidth: radius / 20
             labelFontSize: radius / 8
-            middleText: "<h1><b>" + carListener.vehicleTurbo.toFixed(
-                            2) + "</b></h1>bar"
+            middleText: "<h1><b>" + carListener.vehicleTurbo.toFixed(2) + "</b></h1>bar"
             middleFontSize: radius / 8
             middleFontName: circleFont.name
         }
@@ -240,10 +235,8 @@ ApplicationWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
                 layer.effect: MultiEffect {
-                    saturation: carListener.vehicleShowLights.includes(
-                                    "DL_SIGNAL_L") ? 1.0 : -1.0
-                    opacity: carListener.vehicleShowLights.includes(
-                                 "DL_SIGNAL_L") ? 1.0 : 0.5
+                    saturation: carListener.vehicleShowLights.includes("DL_SIGNAL_L") ? 1.0 : -1.0
+                    opacity: carListener.vehicleShowLights.includes("DL_SIGNAL_L") ? 1.0 : 0.5
                 }
             }
             Image {
@@ -257,10 +250,8 @@ ApplicationWindow {
                 anchors.margins: 10
                 // TODO: All the icons should be the same shade of grey when off.
                 layer.effect: MultiEffect {
-                    saturation: carListener.vehicleShowLights.includes(
-                                    "DL_FULLBEAM") ? 1.0 : -1.0
-                    opacity: carListener.vehicleShowLights.includes(
-                                 "DL_FULLBEAM") ? 1.0 : 0.5
+                    saturation: carListener.vehicleShowLights.includes("DL_FULLBEAM") ? 1.0 : -1.0
+                    opacity: carListener.vehicleShowLights.includes("DL_FULLBEAM") ? 1.0 : 0.5
                 }
             }
             Image {
@@ -273,10 +264,8 @@ ApplicationWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
                 layer.effect: MultiEffect {
-                    saturation: carListener.vehicleShowLights.includes(
-                                    "DL_HANDBRAKE") ? 1.0 : -1.0
-                    opacity: carListener.vehicleShowLights.includes(
-                                 "DL_HANDBRAKE") ? 1.0 : 0.5
+                    saturation: carListener.vehicleShowLights.includes("DL_HANDBRAKE") ? 1.0 : -1.0
+                    opacity: carListener.vehicleShowLights.includes("DL_HANDBRAKE") ? 1.0 : 0.5
                 }
             }
             Image {
@@ -289,10 +278,8 @@ ApplicationWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
                 layer.effect: MultiEffect {
-                    saturation: carListener.vehicleShowLights.includes(
-                                    "DL_SIGNAL_R") ? 1.0 : -1.0
-                    opacity: carListener.vehicleShowLights.includes(
-                                 "DL_SIGNAL_R") ? 1.0 : 0.5
+                    saturation: carListener.vehicleShowLights.includes("DL_SIGNAL_R") ? 1.0 : -1.0
+                    opacity: carListener.vehicleShowLights.includes("DL_SIGNAL_R") ? 1.0 : 0.5
                 }
             }
         }
@@ -301,8 +288,7 @@ ApplicationWindow {
             height: 0.05 * parent.height
             width: 0.025 * numLeds * parent.width * lightAspect
             lightAspect: AppSettings.shiftLightAspect
-            visible: AppSettings.enableClientLights ? (AppSettings.vRedline > 0) : carListener.vehicleDashLights.includes(
-                                                          "DL_SHIFT")
+            visible: AppSettings.enableClientLights ? (AppSettings.vRedline > 0) : carListener.vehicleDashLights.includes("DL_SHIFT")
             maxShiftPoint: AppSettings.vRedline
             vehicleRpm: carListener.vehicleRpm
             anchors.horizontalCenter: parent.horizontalCenter
@@ -312,12 +298,22 @@ ApplicationWindow {
             numLeds: AppSettings.shiftLightCount
             shiftSingleNow: carListener.vehicleShowLights.includes("DL_SHIFT")
             shadeAll: AppSettings.shiftLightColorAll
+            opacity: 0
+        }
+        SmoothRpmDisplay {
+            width: parent.width * 0.8
+            height: parent.height * 0.025
+            tickFontName: uiFont.name
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            value: carListener.vehicleRpm / 1000
+            redlineValue: AppSettings.vRedline / 1000
         }
         Rectangle {
             id: pedalDisplay
             color: "#1F1F1F"
-            width: Math.min(0.075 * parent.width,0.15 * parent.height)
-            height: Math.min(0.075 * parent.width,0.15 * parent.height)
+            width: Math.min(0.075 * parent.width, 0.15 * parent.height)
+            height: Math.min(0.075 * parent.width, 0.15 * parent.height)
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             border.color: "#292929"

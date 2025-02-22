@@ -38,12 +38,9 @@ Rectangle {
         model: numLeds
         Rectangle {
             id: led
-            width: forceLightAspect ? (lightAspect * height) : parent.width
-                                      * 0.8 / (isVertical ? 1 : numLeds)
-            height: forceLightAspect ? Math.min(
-                                           parent.width * 0.8 / (numLeds * lightAspect),
-                                           (parent.height * 0.8)
-                                           / (isVertical ? numLeds : 1)) : parent.height * 0.8
+            width: forceLightAspect ? (lightAspect * height) : parent.width * 0.8 / (isVertical ? 1 : numLeds)
+            height: forceLightAspect ? Math.min(parent.width * 0.8 / (numLeds * lightAspect),
+                                                (parent.height * 0.8) / (isVertical ? numLeds : 1)) : parent.height * 0.8
             radius: width * lightRadiusFactor
             property bool isOn: false
             color: {
@@ -86,11 +83,9 @@ Rectangle {
             }
             // Position each circle in a horizontal line (rtl)
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: isVertical ? 0 : (index - (numLeds - 1)
-                                                              / 2) * (width * 1.1)
+            anchors.horizontalCenterOffset: isVertical ? 0 : (index - (numLeds - 1) / 2) * (width * 1.1)
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: isVertical ? (((numLeds - 1) / 2) - index)
-                                                       * (height * 1.1) : 0
+            anchors.verticalCenterOffset: isVertical ? (((numLeds - 1) / 2) - index) * (height * 1.1) : 0
             border.color: "#252525"
             border.width: 1
             layer.enabled: true

@@ -44,9 +44,7 @@ Item {
         onPaint: {
             var ctx = getContext("2d")
             // Gradient
-            var grad = ctx.createRadialGradient(width / 2, height / 2,
-                                                radius * 0.7, width / 2,
-                                                height / 2, radius)
+            var grad = ctx.createRadialGradient(width / 2, height / 2, radius * 0.7, width / 2, height / 2, radius)
             grad.addColorStop(0, backgroundColorInner)
             grad.addColorStop(1, backgroundColorOuter)
             // Draw the circular background
@@ -60,12 +58,10 @@ Item {
 
             // Draw the alternating long and short ticks
             for (var i = 0; i < tickCount; i++) {
-                var angle = (startAngle * (Math.PI / 180)) - (Math.PI / 2)
-                        + (Math.PI * 2 / tickDivide) * i
+                var angle = (startAngle * (Math.PI / 180)) - (Math.PI / 2) + (Math.PI * 2 / tickDivide) * i
                 var tickLength = (i % longTickEvery === 0) ? longTickLength : shortTickLength
                 var startX = width / 2 + Math.cos(angle) * (radius - tickLength)
-                var startY = height / 2 + Math.sin(
-                            angle) * (radius - tickLength)
+                var startY = height / 2 + Math.sin(angle) * (radius - tickLength)
                 var endX = width / 2 + Math.cos(angle) * (0.98 * radius)
                 var endY = height / 2 + Math.sin(angle) * (0.98 * radius)
 
@@ -78,11 +74,8 @@ Item {
 
                 // Draw labels
                 if (i % labelSkipEvery == 0) {
-                    var labelX = width / 2 + Math.cos(
-                                angle) * (radius - longTickLength - labelFontSize)
-                    var labelY = height / 2 + Math.sin(
-                                angle) * (radius - longTickLength - labelFontSize)
-                            + labelFontSize / 6 // Visual offset
+                    var labelX = width / 2 + Math.cos(angle) * (radius - longTickLength - labelFontSize)
+                    var labelY = height / 2 + Math.sin(angle) * (radius - longTickLength - labelFontSize) + labelFontSize / 6 // Visual offset
                     ctx.font = "bold " + labelFontSize + "px " + tickFontName
                     ctx.fillStyle = labelFontColor
                     ctx.textAlign = "center"
@@ -111,8 +104,7 @@ Item {
                 color: "#000000AA"
             } // Base
         }
-        rotation: ((dial.needleValue - dial.tickStart) / dial.tickStep)
-                  * (360 / dial.tickDivide) + dial.startAngle
+        rotation: ((dial.needleValue - dial.tickStart) / dial.tickStep) * (360 / dial.tickDivide) + dial.startAngle
     }
     MultiEffect {
         source: needle

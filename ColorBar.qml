@@ -21,6 +21,9 @@ Rectangle {
         layer.enabled: true
         layer.effect: MultiEffect {
             saturation: colorBar.value >= 1 ? 0.6 : 0.01
+            blurEnabled: colorBar.value >= 1
+            blurMax: 64
+            blur: 0.1
         }
     }
 }

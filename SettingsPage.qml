@@ -84,8 +84,7 @@ Item {
                                 return true
                             }
                             onClicked: {
-                                AppSettings.listenPort = parseInt(
-                                            portInput.text)
+                                AppSettings.listenPort = parseInt(portInput.text)
                             }
                         }
                     }
@@ -127,8 +126,7 @@ Item {
                                 return true
                             }
                             onClicked: {
-                                AppSettings.vRedline = parseFloat(
-                                            inputShiftPoint.text)
+                                AppSettings.vRedline = parseFloat(inputShiftPoint.text)
                             }
                         }
                     }
@@ -170,8 +168,7 @@ Item {
                                 return true
                             }
                             onClicked: {
-                                AppSettings.shiftLightCount = parseInt(
-                                            inputNumleds.text)
+                                AppSettings.shiftLightCount = parseInt(inputNumleds.text)
                             }
                         }
                     }
@@ -203,8 +200,7 @@ Item {
                             radius: 10
                             height: 40
                             enabled: {
-                                var newAspect = parseFloat(
-                                            inputLightAspect.text)
+                                var newAspect = parseFloat(inputLightAspect.text)
                                 if (!isFinite(newAspect)) {
                                     console.log("Settings: Invalid shift light aspect value.")
                                     return false
@@ -214,8 +210,7 @@ Item {
                                 return true
                             }
                             onClicked: {
-                                AppSettings.shiftLightAspect = parseFloat(
-                                            inputLightAspect.text)
+                                AppSettings.shiftLightAspect = parseFloat(inputLightAspect.text)
                             }
                         }
                     }
