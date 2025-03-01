@@ -81,11 +81,28 @@ Rectangle {
                     }
                 }
             }
-            // Position each circle in a horizontal line (rtl)
+            states: [
+                State {
+                    name: "horizontal"
+                    when: !isVertical
+                    PropertyChanges {
+                        target: led
+                        anchors.horizontalCenterOffset: (index - (numLeds - 1) / 2) * (width * 1.1)
+                        anchors.verticalCenterOffset: 0
+                    }
+                },
+                State {
+                    name: "vertical"
+                    when: isVertical
+                    PropertyChanges {
+                        target: led
+                        anchors.horizontalCenterOffset: 0
+                        anchors.verticalCenterOffset: (((numLeds - 1) / 2) - index) * (height * 1.1)
+                    }
+                }
+            ]
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: isVertical ? 0 : (index - (numLeds - 1) / 2) * (width * 1.1)
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: isVertical ? (((numLeds - 1) / 2) - index) * (height * 1.1) : 0
             border.color: "#252525"
             border.width: 1
             layer.enabled: true
