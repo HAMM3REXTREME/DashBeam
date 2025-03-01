@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Effects
 
 Rectangle {
+    // TODO: DO NOT USE CONDITIONAL BINDINGS FOR OPTIONS, USE STATES
     id: rpmBar
     property bool horizontal: true
     property bool topLabels: true // Draw labels on top (right if not a horizontal bar)
@@ -19,25 +20,134 @@ Rectangle {
     property real barEndThickness: 0.0020
     property real barEndLength: 1.5
     property string tickFontName: "sans-serif"
-    anchors.topMargin: horizontal && topLabels ? height + Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor : undefined
-    anchors.bottomMargin: horizontal && !topLabels ? height + Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor : undefined
-    anchors.leftMargin: !horizontal && !topLabels ? height + Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor : undefined
-    anchors.rightMargin: !horizontal && topLabels ? height + Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor : undefined
+    states: [
+        State {
+            name: "verticalLeft"
+            when: !horizontal && !topLabels
+            AnchorChanges {
+                target: barFillRedline
+                anchors.bottom: undefined
+                anchors.top: undefined
+                anchors.right: parent.right
+                anchors.left: undefined
+            }
+            PropertyChanges {
+                target: barFillRedline
+                width: parent.width * 0.25
+                height: ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.height
+            }
+            PropertyChanges {
+                target: barFill
+                width: parent.width
+                height: (rpmBar.value / rpmBar.maxValue) * parent.height
+            }
+            PropertyChanges {
+                target: rpmBar
+                anchors.rightMargin: height + Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor
+                anchors.topMargin: 0
+                anchors.bottomMargin: 0
+                anchors.leftMargin: 0
+            }
+        },
+        State {
+            name: "verticalRight"
+            when: !horizontal && topLabels
+            AnchorChanges {
+                target: barFillRedline
+                anchors.bottom: undefined
+                anchors.top: undefined
+                anchors.right: undefined
+                anchors.left: parent.left
+            }
+            PropertyChanges {
+                target: barFillRedline
+                width: parent.width * 0.25
+                height: ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.height
+            }
+            PropertyChanges {
+                target: barFill
+                width: parent.width
+                height: (rpmBar.value / rpmBar.maxValue) * parent.height
+            }
+            PropertyChanges {
+                target: rpmBar
+                anchors.leftMargin: height + Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor
+                anchors.topMargin: 0
+                anchors.bottomMargin: 0
+                anchors.rightMargin: 0
+            }
+        },
+        State {
+            name: "horizontalTop"
+            when: horizontal && topLabels
+            PropertyChanges {
+                target: rpmBar
+                anchors.topMargin: height + Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor
+                anchors.leftMargin: 0
+                anchors.bottomMargin: 0
+                anchors.rightMargin: 0
+            }
+            AnchorChanges {
+                target: barFillRedline
+                anchors.bottom: parent.bottom
+                anchors.top: undefined
+                anchors.right: parent.right
+                anchors.left: undefined
+            }
+            PropertyChanges {
+                target: barFill
+                width: (rpmBar.value / rpmBar.maxValue) * parent.width
+                height: parent.height
+            }
+            PropertyChanges {
+                target: barFillRedline
+                height: parent.height * 0.25
+                width: ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.width
+            }
+        },
+        State {
+            name: "horizontalBottom"
+            when: horizontal && !topLabels
+            PropertyChanges {
+                target: rpmBar
+                anchors.bottomMargin: height + Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor
+                anchors.leftMargin: 0
+                anchors.topMargin: 0
+                anchors.rightMargin: 0
+            }
+            AnchorChanges {
+                target: barFillRedline
+                anchors.bottom: undefined
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.left: undefined
+            }
+            PropertyChanges {
+                target: barFill
+                width: (rpmBar.value / rpmBar.maxValue) * parent.width
+                height: parent.height
+            }
+            PropertyChanges {
+                target: barFillRedline
+                height: parent.height * 0.25
+                width: ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.width
+            }
+        }
+    ]
     Rectangle {
-        // Redline bar
         id: barFillRedline
-        // For horizontal bars, width should be [(max rpm - redline rpm) / max rpm], vertical bars take 25% of parent's width.
-        width: rpmBar.horizontal ? ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.width : parent.width * 0.25
-        // Inverse of statement above.
-        height: rpmBar.horizontal ? parent.height * 0.25 : ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.height
+        // // For horizontal bars, width should be [(max rpm - redline rpm) / max rpm], vertical bars take 25% of parent's width.
+        // width: rpmBar.horizontal ? ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.width : parent.width * 0.25
+        // // Inverse of statement above.
+        // height: rpmBar.horizontal ? parent.height * 0.25 : ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.height
         // horizontal bar, labels on top --> start from parent.bottom
-        anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
+        //anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
         // horizontal bar, labels on bottom --> start from parent.top
-        anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.top) : undefined
+        //anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.top) : undefined
         // horizontal bar --> start from parent.right | vertical bar, labels on bottom (left) --> start from parent.right
-        anchors.right: rpmBar.horizontal ? parent.right : (rpmBar.topLabels ? undefined : parent.right)
+        //anchors.right: rpmBar.horizontal ? parent.right : (rpmBar.topLabels ? undefined : parent.right)
         // vertical bar, labels on top (right) --> start from parent.left
-        anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.left : undefined)
+        //anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.left : undefined)
         layer.enabled: true
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -49,10 +159,10 @@ Rectangle {
     Rectangle {
         id: barFill
         // horizontal bar --> parent.width * rpm/max rpm | vertical bar --> full parent.width
-        width: rpmBar.horizontal ? (rpmBar.value / rpmBar.maxValue) * parent.width : parent.width
+        //width: rpmBar.horizontal ? (rpmBar.value / rpmBar.maxValue) * parent.width : parent.width
         // horizontal bar -->  full parent.height | vertical bar --> parent.height * rpm/max rpm
-        height: rpmBar.horizontal ? parent.height : (rpmBar.value / rpmBar.maxValue) * parent.height
-        anchors.bottom: parent.bottom // Doesn't matter too much
+        //height: rpmBar.horizontal ? parent.height : (rpmBar.value / rpmBar.maxValue) * parent.height
+        anchors.bottom: parent.bottom // Doesn't matter too much - 100% parent width anyways
         // Blur effect
         layer.enabled: true
         layer.effect: MultiEffect {
@@ -89,6 +199,7 @@ Rectangle {
     Repeater {
         model: Math.floor(rpmBar.maxValue / rpmBar.tickStep) + 1
         Rectangle {
+            id: tickMark
             // horizontal bar, labels on top --> start from parent.bottom
             anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
             // horizontal bar, labels on bottom --> start from parent.top
@@ -106,6 +217,7 @@ Rectangle {
             // vertical bars --> arrange ticks on the y axis
             y: rpmBar.horizontal ? 0 : (1 - (index / (rpmBar.maxValue / rpmBar.tickStep))) * parent.height
             Text {
+                id: tickLabel
                 text: index * rpmBar.tickStep
                 visible: index % rpmBar.labelTickEvery === 0 ? true : false
                 color: rpmBar.labelFontColor
