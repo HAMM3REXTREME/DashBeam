@@ -15,14 +15,14 @@ Item {
     property int shortTickLength: radius / 16 // Pixel value of short ticks
     property int longTickEvery: 2 // Longer tick line every n
     property int radius: 150
-    property color backgroundColorInner: "#232323"
-    property color backgroundColorOuter: "#2F2F2F"
+    property color backgroundColorInner: "#191919"
+    property color backgroundColorOuter: "#292929"
     property color screenBackground: "#242426"
-    property color strokeColor: "#FFFFFF"
-    property color tickColor: "#FFFFFF"
+    property color strokeColor: "#FFF4C9"
+    property color tickColor: "#FFF4C9"
     property color tickColorRedline: "#FF0000"
-    property color labelFontColor: "#FFFFFF"
-    property color middleFontColor: "#FFFFFF"
+    property color labelFontColor: "#FFF4C9"
+    property color middleFontColor: "#FFF4C9"
     property color needleColor: "red"
     property real needleValue: 0
     property real needleWidth: radius / 40
@@ -34,6 +34,8 @@ Item {
     property string middleFontName: "monospace"
     property real middleFontSize: radius / 5
     property string middleText: ""
+    property bool blurLayer: true
+    property real blurValue: radius / 90000
 
     property real ghostRotation: 0
 
@@ -41,18 +43,24 @@ Item {
         id: background
         width: parent.width
         height: parent.height
+        layer.enabled: blurLayer
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blurMax: 64
+            blur: blurValue
+        }
         onPaint: {
             var ctx = getContext("2d")
             // Gradient
-            var grad = ctx.createRadialGradient(width / 2, height / 2, radius * 0.7, width / 2, height / 2, radius)
-            grad.addColorStop(0, backgroundColorInner)
-            grad.addColorStop(1, backgroundColorOuter)
+            var backGradient = ctx.createRadialGradient(width / 2, height / 2, radius * 0.7, width / 2, height / 2, radius)
+            backGradient.addColorStop(0, backgroundColorInner)
+            backGradient.addColorStop(1, backgroundColorOuter)
             // Draw the circular background
             ctx.beginPath()
             ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2)
-            ctx.fillStyle = grad
+            ctx.fillStyle = backGradient
             ctx.fill()
-            ctx.lineWidth = radius / 50
+            ctx.lineWidth = radius / 100
             ctx.strokeStyle = strokeColor
             ctx.stroke()
 
@@ -62,8 +70,8 @@ Item {
                 var tickLength = (i % longTickEvery === 0) ? longTickLength : shortTickLength
                 var startX = width / 2 + Math.cos(angle) * (radius - tickLength)
                 var startY = height / 2 + Math.sin(angle) * (radius - tickLength)
-                var endX = width / 2 + Math.cos(angle) * (0.98 * radius)
-                var endY = height / 2 + Math.sin(angle) * (0.98 * radius)
+                var endX = width / 2 + Math.cos(angle) * (0.985 * radius)
+                var endY = height / 2 + Math.sin(angle) * (0.985 * radius)
 
                 ctx.beginPath()
                 ctx.moveTo(startX, startY)
@@ -129,6 +137,12 @@ Item {
         border.width: 1
         radius: dial.width / 2 // Fully rounded (circle)
         anchors.centerIn: parent
+        layer.enabled: blurLayer
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blurMax: 64
+            blur: blurValue
+        }
         Text {
             anchors.centerIn: parent
             text: dial.middleText
@@ -137,6 +151,12 @@ Item {
             font.family: middleFontName
             horizontalAlignment: Text.AlignHCenter
             textFormat: Text.RichText
+            layer.enabled: true // Screen should have blur anyways
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blurMax: 64
+                blur: blurValue
+            }
         }
         gradient: Gradient {
             GradientStop {
