@@ -57,6 +57,12 @@ ApplicationWindow {
             border.color: "#292929"
             border.width: 1
             clip: true
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blurMax: 64
+                blur: 0.05
+            }
             Image {
                 id: brandingIcon
                 source: "assets/screen_topleft.svg"
@@ -148,10 +154,7 @@ ApplicationWindow {
             needleValue: carListener.vehicleRpm / 1000
             labelFontSize: radius / 10
             tickFontName: uiFont.name
-            tickColor: "#FE8000"
-            strokeColor: "#FE8000"
-            labelFontColor: "#FE8000"
-            backgroundColorInner: carListener.vehicleShowLights.includes("DL_SHIFT") ? "#392424" : "#242424"
+            backgroundColorOuter: carListener.vehicleShowLights.includes("DL_SHIFT") ? "#492929" : "#292929"
             redline: AppSettings.vRedline > 0 ? AppSettings.vRedline / 1000 : 99999.9
             middleText: "<h1><b>" + carListener.vehicleRpm.toFixed() + "</b></h1>RPM"
             middleFontSize: radius / 8
@@ -172,9 +175,6 @@ ApplicationWindow {
             tickCount: 151 // 75% + 1 for 3/4 quarters
             tickDivide: 200
             startAngle: 270
-            tickColor: "#FE8000"
-            strokeColor: "#FE8000"
-            labelFontColor: "#FE8000"
             labelSkipEvery: 10
             longTickEvery: 5
             tickFontName: uiFont.name
@@ -199,9 +199,6 @@ ApplicationWindow {
             tickCount: 41
             tickDivide: 50
             startAngle: 270
-            tickColor: "#FE8000"
-            strokeColor: "#FE8000"
-            labelFontColor: "#FE8000"
             longTickLength: radius / 8
             shortTickLength: radius / 12
             labelSkipEvery: 5
@@ -298,16 +295,29 @@ ApplicationWindow {
             numLeds: AppSettings.shiftLightCount
             shiftSingleNow: carListener.vehicleShowLights.includes("DL_SHIFT")
             shadeAll: AppSettings.shiftLightColorAll
-            opacity: 0
         }
         SmoothRpmDisplay {
-            width: parent.width * 0.8
-            height: parent.height * 0.025
+            id: testDisp
+            opacity: 90
+            width: parent.width * 0.1
+            height: parent.height * 0.85
             tickFontName: uiFont.name
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
+            //anchors.horizontalCenter: parent.horizontalCenter
+            //anchors.top: parent.top
+            anchors.centerIn: parent
+            horizontal: false
             value: carListener.vehicleRpm / 1000
             redlineValue: AppSettings.vRedline / 1000
+        }
+        RoundButton {
+            text: "vert test"
+            width: 50
+            height: 40
+            radius: 5
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.margins: 100
+            onClicked: testDisp.topLabels = !testDisp.topLabels
         }
         Rectangle {
             id: pedalDisplay
