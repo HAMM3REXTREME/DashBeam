@@ -265,28 +265,30 @@ Item {
                         color: "white"
                         font.pixelSize: 24
                     }
+                    Text {
+                        text: "All IP addresses for this device. Use the correct one (accessible on your local network) in BeamNG settings."
+                        color: "white"
+                        font.pixelSize: 16
+                    }
                     Rectangle {
                         id: ipBox
-                        width: ipText.implicitWidth + 20
-                        height: ipText.implicitHeight + 20
+                        width: ipText.implicitWidth + 30
+                        height: ipText.implicitHeight + 30
                         color: "#333333"
                         radius: 10
                         border.color: "#555555"
                         border.width: 2
 
-                        Text {
-                            id: ipText
-                            visible: false
-                            anchors.centerIn: parent
-                            anchors.margins: 10
-                            font.pixelSize: 24
-                            font.family: "monospace"
-                            text: (networkInfo ? networkInfo.ipAddresses : "Can't find IP addresses")
-                            wrapMode: TextArea.Wrap
-                            color: "#FFFFFF"
+                        MouseArea {
+                            id: ipRevealer
+                            anchors.fill: parent
+                            onClicked: {
+                                ipText.visible = !ipText.visible
+                                ipTextHiddenMsg.visible = !ipTextHiddenMsg.visible
+                            }
                         }
                         Text {
-                            id: ipTextHider
+                            id: ipTextHiddenMsg
                             visible: true
                             anchors.centerIn: parent
                             anchors.margins: 10
@@ -295,13 +297,17 @@ Item {
                             wrapMode: TextArea.Wrap
                             color: "#FFFFFF"
                         }
-                        MouseArea {
-                            id: ipRevealer
-                            anchors.fill: parent
-                            onClicked: {
-                                ipText.visible = !ipText.visible
-                                ipTextHider.visible = !ipTextHider.visible
-                            }
+                        TextEdit {
+                            id: ipText
+                            visible: false
+                            readOnly: true
+                            anchors.centerIn: parent
+                            anchors.margins: 10
+                            font.pixelSize: 20
+                            font.family: "monospace"
+                            text: (networkInfo ? networkInfo.ipAddresses : "Can't find IP addresses")
+                            wrapMode: TextArea.Wrap
+                            color: "#FFFFFF"
                         }
                     }
                     Text {
