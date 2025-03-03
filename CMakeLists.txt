@@ -34,6 +34,7 @@ qt_add_qml_module(DashBeamApp
     QML_FILES ColorBar.qml
     QML_FILES AppSettings.qml
     QML_FILES SmoothRpmDisplay.qml
+    QML_FILES GearText.qml
 
 )
 

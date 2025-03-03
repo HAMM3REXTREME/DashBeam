@@ -309,6 +309,10 @@ ApplicationWindow {
             value: carListener.vehicleRpm / 1000
             redlineValue: AppSettings.vRedline / 1000
         }
+        GearText{
+            id: testGear
+            textBox: "3"
+        }
         RoundButton {
             text: "vert test"
             width: 50
