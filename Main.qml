@@ -44,49 +44,48 @@ ApplicationWindow {
         id: backRect
         width: parent.width
         height: parent.height
-        color: "#151515"
+        color: "#141414"
         anchors.centerIn: parent
-
         Rectangle {
             id: centerBox
-            width: parent.width * 0.3
-            height: parent.height * 0.4
+            width: parent.width * 0.25
+            height: parent.height * 0.45
             color: "#060607"
             radius: 4
             anchors.centerIn: parent
-            border.color: "#292929"
+            border.color: "#393939"
             border.width: 1
             clip: true
-            layer.enabled: true
+            gradient: Gradient {
+                GradientStop {
+                    position: 0.0
+                    color: "#161617"
+                } // top
+                GradientStop {
+                    position: 1.0
+                    color: "#060607"
+                } // bottom
+            }
+            layer.enabled: false
             layer.effect: MultiEffect {
                 blurEnabled: true
                 blurMax: 64
                 blur: 0.05
             }
-            Image {
-                id: brandingIcon
-                source: "assets/screen_topleft.svg"
-                layer.enabled: true
-                width: parent.height
-                height: parent.height
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.margins: 5
-                layer.effect: MultiEffect {
-                    saturation: carListener.vehicleThrottle === 1 ? 1.0 : -1.0
-                    opacity: carListener.vehicleThrottle === 1 ? 0.75 : 0.25
+            // Text {
+            //     id: gearText
+            //     anchors.centerIn: parent
+            //     text: (carListener.vehicleGear - 1).toString()
+            //     color: "white"
+            //     font.pixelSize: parent.height / 2
+            //     font.family: uiFont.name
+            //     wrapMode: Text.Wrap
+            //     horizontalAlignment: Text.AlignHCenter
+            // }
+            GearText{
+                    id: gearText
+                    textBox: (carListener.vehicleGear - 1).toString()
                 }
-            }
-            Text {
-                id: gearText
-                anchors.centerIn: parent
-                text: (carListener.vehicleGear - 1).toString()
-                color: "white"
-                font.pixelSize: parent.height / 2
-                font.family: uiFont.name
-                wrapMode: Text.Wrap
-                horizontalAlignment: Text.AlignHCenter
-            }
             Text {
                 id: fuelText
                 anchors.left: parent.left
@@ -140,7 +139,7 @@ ApplicationWindow {
         // RPM Gauge
         CircleMeter {
             id: tacho
-            radius: Math.min(parent.width / 6, parent.height / 2) - 10
+            radius: Math.min(parent.width / 6, parent.height / 2) - 5
             width: parent.width / 3
             height: parent.height
             anchors.left: parent.left
@@ -164,7 +163,7 @@ ApplicationWindow {
         // Speed Gauge
         CircleMeter {
             id: speedo
-            radius: Math.min(parent.width / 6, parent.height / 2) - 10
+            radius: Math.min(parent.width / 6, parent.height / 2) - 5
             width: parent.width / 3
             height: parent.height
             anchors.right: parent.right
@@ -213,7 +212,7 @@ ApplicationWindow {
 
         Rectangle {
             id: indicators
-            width: 0.4 * parent.width
+            width: 0.3 * parent.width
             height: 0.08 * parent.height
             color: "#1F1F1F"
             anchors.horizontalCenter: parent.horizontalCenter
@@ -282,7 +281,7 @@ ApplicationWindow {
         }
         ShiftLights {
             id: shiftLights
-            height: 0.05 * parent.height
+            height: 0.025 * parent.height
             width: 0.025 * numLeds * parent.width * lightAspect
             lightAspect: AppSettings.shiftLightAspect
             visible: AppSettings.enableClientLights ? (AppSettings.vRedline > 0) : carListener.vehicleDashLights.includes("DL_SHIFT")
@@ -290,7 +289,9 @@ ApplicationWindow {
             vehicleRpm: carListener.vehicleRpm
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.margins: parent.height * 0.025
+            border.color: "#00000000"
+            color: "#00000000"
+            anchors.margins: parent.height * 0.01
             shiftSingleOn: !AppSettings.enableClientLights
             numLeds: AppSettings.shiftLightCount
             shiftSingleNow: carListener.vehicleShowLights.includes("DL_SHIFT")
@@ -298,29 +299,23 @@ ApplicationWindow {
         }
         SmoothRpmDisplay {
             id: testDisp
-            opacity: 90
-            width: parent.width * 0.1
-            height: parent.height * 0.85
+            opacity: 0.8
+            width: parent.width * 0.8
+            height: parent.height * 0.085
             tickFontName: uiFont.name
-            //anchors.horizontalCenter: parent.horizontalCenter
-            //anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
             anchors.centerIn: parent
-            horizontal: false
             value: carListener.vehicleRpm / 1000
             redlineValue: AppSettings.vRedline / 1000
         }
-        GearText{
-            id: testGear
-            textBox: "3"
-        }
-        RoundButton {
-            text: "vert test"
-            width: 50
+        Button {
+            text: "SmoothRpmDisplay test"
+            width: 200
             height: 40
-            radius: 5
             anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.margins: 100
+            anchors.right: parent.right
+            anchors.margins: 150
             onClicked: testDisp.topLabels = !testDisp.topLabels
         }
         Rectangle {

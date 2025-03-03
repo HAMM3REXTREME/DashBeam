@@ -7,6 +7,7 @@ import QtQuick.Controls.Material
 
 // Must be loaded with Loader { id: settingsLoader }
 Item {
+    id: settingsPage
     visible: true
     width: 1280
     height: 720
@@ -222,8 +223,9 @@ Item {
                         }
                     }
                     ShiftLights {
-                        height: 0.05 * parent.height
+                        height: 0.025 * settingsPage.height
                         width: 0.025 * numLeds * parent.width * lightAspect
+                        anchors.horizontalCenter: parent.horizontalCenter
                         shiftSingleOn: !AppSettings.enableClientLights
                         maxShiftPoint: AppSettings.vRedline
                         vehicleRpm: dummyRpmSlide.value

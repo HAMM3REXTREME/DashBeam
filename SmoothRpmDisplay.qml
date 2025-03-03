@@ -32,6 +32,13 @@ Rectangle {
                 anchors.left: undefined
             }
             PropertyChanges {
+                target: barFillEnd
+                width:  barEndLength * parent.width
+                height: barEndThickness * parent.height
+                anchors.horizontalCenter: undefined
+                anchors.verticalCenter: barFill.top
+            }
+            PropertyChanges {
                 target: barFillRedline
                 width: parent.width * 0.25
                 height: ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.height
@@ -58,6 +65,13 @@ Rectangle {
                 anchors.top: undefined
                 anchors.right: undefined
                 anchors.left: parent.left
+            }
+            PropertyChanges {
+                target: barFillEnd
+                width:  barEndLength * parent.width
+                height: barEndThickness * parent.height
+                anchors.horizontalCenter: undefined
+                anchors.verticalCenter: barFill.top
             }
             PropertyChanges {
                 target: barFillRedline
@@ -87,6 +101,13 @@ Rectangle {
                 anchors.bottomMargin: 0
                 anchors.rightMargin: 0
             }
+            PropertyChanges {
+                target: barFillEnd
+                width:  barEndThickness * parent.width
+                height: barEndLength * parent.height
+                anchors.horizontalCenter: barFill.right
+                anchors.verticalCenter: undefined
+            }
             AnchorChanges {
                 target: barFillRedline
                 anchors.bottom: parent.bottom
@@ -115,6 +136,13 @@ Rectangle {
                 anchors.topMargin: 0
                 anchors.rightMargin: 0
             }
+            PropertyChanges {
+                target: barFillEnd
+                width:  barEndThickness * parent.width
+                height: barEndLength * parent.height
+                anchors.horizontalCenter: barFill.right
+                anchors.verticalCenter: undefined
+            }
             AnchorChanges {
                 target: barFillRedline
                 anchors.bottom: undefined
@@ -136,18 +164,6 @@ Rectangle {
     ]
     Rectangle {
         id: barFillRedline
-        // // For horizontal bars, width should be [(max rpm - redline rpm) / max rpm], vertical bars take 25% of parent's width.
-        // width: rpmBar.horizontal ? ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.width : parent.width * 0.25
-        // // Inverse of statement above.
-        // height: rpmBar.horizontal ? parent.height * 0.25 : ((rpmBar.maxValue - rpmBar.redlineValue) / rpmBar.maxValue) * parent.height
-        // horizontal bar, labels on top --> start from parent.bottom
-        //anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
-        // horizontal bar, labels on bottom --> start from parent.top
-        //anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.top) : undefined
-        // horizontal bar --> start from parent.right | vertical bar, labels on bottom (left) --> start from parent.right
-        //anchors.right: rpmBar.horizontal ? parent.right : (rpmBar.topLabels ? undefined : parent.right)
-        // vertical bar, labels on top (right) --> start from parent.left
-        //anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.left : undefined)
         layer.enabled: true
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -158,12 +174,7 @@ Rectangle {
     }
     Rectangle {
         id: barFill
-        // horizontal bar --> parent.width * rpm/max rpm | vertical bar --> full parent.width
-        //width: rpmBar.horizontal ? (rpmBar.value / rpmBar.maxValue) * parent.width : parent.width
-        // horizontal bar -->  full parent.height | vertical bar --> parent.height * rpm/max rpm
-        //height: rpmBar.horizontal ? parent.height : (rpmBar.value / rpmBar.maxValue) * parent.height
         anchors.bottom: parent.bottom // Doesn't matter too much - 100% parent width anyways
-        // Blur effect
         layer.enabled: true
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -176,11 +187,11 @@ Rectangle {
         id: barFillEnd
         color: "#ee0000"
         // barEndThickness is a smaller factor than barEndLength, so basically swap them in case of vertical bars.
-        width: rpmBar.horizontal ? barEndThickness * parent.width : barEndLength * parent.width
-        height: rpmBar.horizontal ? barEndLength * parent.height : barEndThickness * parent.height
+        //width: rpmBar.horizontal ? barEndThickness * parent.width : barEndLength * parent.width
+        //height: rpmBar.horizontal ? barEndLength * parent.height : barEndThickness * parent.height
         // anchor the 'across' center to the barFill's 'moving' end. Differs for horizontal and vertical bars.
-        anchors.horizontalCenter: rpmBar.horizontal ? barFill.right : undefined
-        anchors.verticalCenter: rpmBar.horizontal ? undefined : barFill.top
+        //anchors.horizontalCenter: rpmBar.horizontal ? barFill.right : undefined
+        // anchors.verticalCenter: rpmBar.horizontal ? undefined : barFill.top
         // horizontal bar, labels on top --> start from parent.bottom
         anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
         // horizontal bar, labels on bottom --> start from parent.top

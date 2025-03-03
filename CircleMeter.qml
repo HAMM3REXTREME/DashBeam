@@ -34,7 +34,7 @@ Item {
     property string middleFontName: "monospace"
     property real middleFontSize: radius / 5
     property string middleText: ""
-    property bool blurLayer: true
+    property bool blurLayer: false
     property real blurValue: radius / 90000
 
     property real ghostRotation: 0
@@ -151,7 +151,7 @@ Item {
             font.family: middleFontName
             horizontalAlignment: Text.AlignHCenter
             textFormat: Text.RichText
-            layer.enabled: true // Screen should have blur anyways
+            layer.enabled: blurLayer
             layer.effect: MultiEffect {
                 blurEnabled: true
                 blurMax: 64
