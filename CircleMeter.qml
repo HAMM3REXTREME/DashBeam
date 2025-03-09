@@ -39,6 +39,76 @@ Item {
 
     property real ghostRotation: 0
 
+    Connections {
+        function onNeedleValueChanged() {
+            revArc.requestPaint()
+        }
+        function onRedlineChanged() {
+            background.requestPaint()
+        }
+        // Manually request repaint...
+        function onRepaintChanged() {
+            background.requestPaint()
+            revArc.requestPaint()
+            repaint = false
+        }
+    }
+    Rectangle {
+        id: backgroundRect
+        width: dial.radius * 2
+        height: dial.radius * 2
+        anchors.centerIn: parent
+        radius: dial.radius
+        gradient: Gradient {
+            stops: [
+                GradientStop {
+                    position: 0
+                    color: backgroundColorInner
+                },
+                GradientStop {
+                    position: 1
+                    color: backgroundColorOuter
+                }
+            ]
+        }
+        layer.enabled: blurLayer
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blurMax: 64
+            blur: blurValue
+        }
+        // Border (stroke)
+        border.color: strokeColor
+        border.width: radius / 100
+    }
+    Canvas {
+        id: revArc
+        width: parent.width
+        height: parent.height
+        rotation: startAngle - 90
+        layer.enabled: blurLayer
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blurMax: 64
+            blur: blurValue
+        }
+        onPaint: {
+            var ctx = getContext("2d")
+            var endAngleRad = (needle.rotation - startAngle) * (Math.PI / 180)
+            // Define the gradient for the stroke
+            var strokeGradient = ctx.createLinearGradient(0, 0, width, height)
+            strokeGradient.addColorStop(0, "#ff0000") // Redline end
+            strokeGradient.addColorStop(1, "#002929") // Idle end
+
+            ctx.clearRect(0, 0, width, height)
+            ctx.beginPath()
+            ctx.arc(width / 2, height / 2, 0.65 * radius, 0, endAngleRad)
+            ctx.lineWidth = radius / 20
+            ctx.strokeStyle = strokeGradient
+            ctx.stroke()
+        }
+    }
+
     Canvas {
         id: background
         width: parent.width
@@ -51,19 +121,13 @@ Item {
         }
         onPaint: {
             var ctx = getContext("2d")
-            // Gradient
-            var backGradient = ctx.createRadialGradient(width / 2, height / 2, radius * 0.7, width / 2, height / 2, radius)
-            backGradient.addColorStop(0, backgroundColorInner)
-            backGradient.addColorStop(1, backgroundColorOuter)
+            ctx.clearRect(0, 0, width, height)
             // Draw the circular background
             ctx.beginPath()
             ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2)
-            ctx.fillStyle = backGradient
-            ctx.fill()
             ctx.lineWidth = radius / 100
             ctx.strokeStyle = strokeColor
             ctx.stroke()
-
             // Draw the alternating long and short ticks
             for (var i = 0; i < tickCount; i++) {
                 var angle = (startAngle * (Math.PI / 180)) - (Math.PI / 2) + (Math.PI * 2 / tickDivide) * i
@@ -93,7 +157,6 @@ Item {
             }
         }
     }
-
     Rectangle {
         id: needle
         smooth: true
@@ -109,7 +172,7 @@ Item {
             } // Tip (of the needle)
             GradientStop {
                 position: 0.4
-                color: "#000000AA"
+                color: "#551010"
             } // Base
         }
         rotation: ((dial.needleValue - dial.tickStart) / dial.tickStep) * (360 / dial.tickDivide) + dial.startAngle
@@ -177,26 +240,6 @@ Item {
         onTriggered: {
             // Smoothly interpolate the ghost rotation to follow the needle with a delay
             dial.ghostRotation = dial.ghostRotation + (needle.rotation - dial.ghostRotation) * 0.3
-        }
-    }
-
-    Connections {
-        function onBackgroundColorInnerChanged() {
-            background.requestPaint()
-        }
-
-        function onBackgroundColorOuterChanged() {
-            background.requestPaint()
-        }
-
-        function onRedlineChanged() {
-            background.requestPaint()
-        }
-
-        // Manually request repaint...
-        function onRepaintChanged() {
-            background.requestPaint()
-            repaint = false
         }
     }
 }
