@@ -153,7 +153,6 @@ ApplicationWindow {
             needleValue: carListener.vehicleRpm / 1000
             labelFontSize: radius / 10
             tickFontName: uiFont.name
-            backgroundColorOuter: "#292929"
             redline: AppSettings.vRedline > 0 ? AppSettings.vRedline / 1000 : 99999.9
             middleText: "<h1><b>" + carListener.vehicleRpm.toFixed() + "</b></h1>RPM"
             middleFontSize: radius / 8

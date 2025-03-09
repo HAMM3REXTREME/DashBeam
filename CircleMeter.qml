@@ -14,49 +14,49 @@ Item {
     property int longTickLength: radius / 8 // Pixel value of long ticks
     property int shortTickLength: radius / 16 // Pixel value of short ticks
     property int longTickEvery: 2 // Longer tick line every n
-    property int radius: 150
-    property color backgroundColorInner: "#191919"
-    property color backgroundColorOuter: "#292929"
-    property color screenBackground: "#242426"
-    property color strokeColor: "#f4f0e6"
-    property color tickColor: "#f4f0e6"
-    property color tickColorRedline: "#FF0000"
-    property color labelFontColor: "#f4f0e6"
-    property color middleFontColor: "#f4f0e6"
+    property int radius: 150 // Radius of the meter
+    property color backgroundColorUpper: "#191919" // Background gradient upper color
+    property color backgroundColorBottom: "#292929" // Background gradient lower color
+    property color screenBackground: "#242426" // Middle section's screen color (top end of gradient)
+    property color borderStrokeColor: "#f4f0e6" // Stroke color for the border of the meter
+    property color tickColor: "#f4f0e6" // Stroke color for the tick marks
+    property color tickColorRedline: "#FF0000" // Color for the tick marks at or after the redline
+    property color labelFontColor: "#f4f0e6" // Color of the labels
+    property color middleFontColor: "#f4f0e6" // Color of the middle text
     property color needleColor: "red"
     property color arcColor: "#9F0A0A"
     property color arcColorRedline: "#bf0909"
-    property real needleValue: 0
+    property real needleValue: 0 // Set your rpm here
     property real needleWidth: radius / 40
-    property real startAngle: 180
+    property real startAngle: 180 // Angle in degrees to start labelling (and the needle's 0 position)
     property real redline: 99999.9
-    property bool repaint: false
-    property bool showScreen: true
+    property bool repaint: false // Set to true to request a repaint for all canvas components
+    property bool showScreen: true // Show the middle part or not
     property string tickFontName: "sans-serif"
-    property string middleFontName: "monospace"
+    property string middleFontName: "monospace" // Font name for the middle display
     property real middleFontSize: radius / 5
-    property string middleText: ""
-    property bool blurLayer: false
+    property string middleText: "" // Rich text in the middle display
+    property bool blurLayer: false // 'Cinematic' blur thing
     property real blurValue: radius / 90000
 
-    property real ghostRotation: 0
+    property real ghostRotation: 0 // Ghost needle rotation (don't set this manually, a timer will make the ghost needle lag automatically)
 
     Connections {
         function onNeedleValueChanged() {
             revArc.requestPaint()
         }
         function onRedlineChanged() {
-            background.requestPaint()
+            circleMarks.requestPaint()
         }
         // Manually request repaint...
         function onRepaintChanged() {
-            background.requestPaint()
+            circleMarks.requestPaint()
             revArc.requestPaint()
             repaint = false
         }
     }
     Rectangle {
-        id: backgroundRect
+        id: backgroundCircle
         width: dial.radius * 2
         height: dial.radius * 2
         anchors.centerIn: parent
@@ -65,11 +65,11 @@ Item {
             stops: [
                 GradientStop {
                     position: 0
-                    color: backgroundColorInner
+                    color: backgroundColorUpper
                 },
                 GradientStop {
                     position: 1
-                    color: backgroundColorOuter
+                    color: backgroundColorBottom
                 }
             ]
         }
@@ -79,8 +79,7 @@ Item {
             blurMax: 64
             blur: blurValue
         }
-        // Border (stroke)
-        border.color: strokeColor
+        border.color: borderStrokeColor
         border.width: radius / 100
     }
     Canvas {
@@ -107,7 +106,7 @@ Item {
     }
 
     Canvas {
-        id: background
+        id: circleMarks
         width: parent.width
         height: parent.height
         layer.enabled: blurLayer
@@ -123,7 +122,7 @@ Item {
             ctx.beginPath()
             ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2)
             ctx.lineWidth = radius / 100
-            ctx.strokeStyle = strokeColor
+            ctx.strokeStyle = borderStrokeColor
             ctx.stroke()
             // Draw the alternating long and short ticks
             for (var i = 0; i < tickCount; i++) {
@@ -159,8 +158,8 @@ Item {
         smooth: true
         width: dial.needleWidth
         height: dial.radius * 0.85
-        anchors.horizontalCenter: background.horizontalCenter
-        anchors.bottom: background.verticalCenter
+        anchors.horizontalCenter: circleMarks.horizontalCenter
+        anchors.bottom: circleMarks.verticalCenter
         transformOrigin: Item.Bottom
         gradient: Gradient {
             GradientStop {
@@ -180,8 +179,8 @@ Item {
         blurEnabled: true
         blurMax: 64
         blur: 0.8
-        anchors.horizontalCenter: background.horizontalCenter
-        anchors.bottom: background.verticalCenter
+        anchors.horizontalCenter: circleMarks.horizontalCenter
+        anchors.bottom: circleMarks.verticalCenter
         transformOrigin: Item.Bottom
         rotation: dial.ghostRotation
     }
@@ -193,7 +192,7 @@ Item {
         width: dial.radius * 1.4 - longTickLength - labelFontSize
         height: dial.radius * 1.4 - longTickLength - labelFontSize
         color: dial.screenBackground
-        border.color: dial.strokeColor // Stroke color
+        border.color: dial.borderStrokeColor // Stroke color
         border.width: 1
         radius: dial.width / 2 // Fully rounded (circle)
         anchors.centerIn: parent
