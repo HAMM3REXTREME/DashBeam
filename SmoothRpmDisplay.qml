@@ -27,16 +27,23 @@ Rectangle {
             AnchorChanges {
                 target: barFillRedline
                 anchors.bottom: undefined
-                anchors.top: undefined
+                anchors.top: parent.top
                 anchors.right: parent.right
                 anchors.left: undefined
             }
             PropertyChanges {
                 target: barFillEnd
-                width:  barEndLength * parent.width
+                width: barEndLength * parent.width
                 height: barEndThickness * parent.height
                 anchors.horizontalCenter: undefined
                 anchors.verticalCenter: barFill.top
+            }
+            AnchorChanges {
+                target: barFillEnd
+                anchors.bottom: undefined
+                anchors.top: undefined
+                anchors.left: undefined
+                anchors.right: parent.right
             }
             PropertyChanges {
                 target: barFillRedline
@@ -62,16 +69,23 @@ Rectangle {
             AnchorChanges {
                 target: barFillRedline
                 anchors.bottom: undefined
-                anchors.top: undefined
+                anchors.top: parent.top
                 anchors.right: undefined
                 anchors.left: parent.left
             }
             PropertyChanges {
                 target: barFillEnd
-                width:  barEndLength * parent.width
+                width: barEndLength * parent.width
                 height: barEndThickness * parent.height
                 anchors.horizontalCenter: undefined
                 anchors.verticalCenter: barFill.top
+            }
+            AnchorChanges {
+                target: barFillEnd
+                anchors.bottom: undefined
+                anchors.top: undefined
+                anchors.left: parent.left
+                anchors.right: undefined
             }
             PropertyChanges {
                 target: barFillRedline
@@ -103,10 +117,17 @@ Rectangle {
             }
             PropertyChanges {
                 target: barFillEnd
-                width:  barEndThickness * parent.width
+                width: barEndThickness * parent.width
                 height: barEndLength * parent.height
                 anchors.horizontalCenter: barFill.right
                 anchors.verticalCenter: undefined
+            }
+            AnchorChanges {
+                target: barFillEnd
+                anchors.bottom: parent.bottom
+                anchors.top: undefined
+                anchors.left: undefined
+                anchors.right: undefined
             }
             AnchorChanges {
                 target: barFillRedline
@@ -138,7 +159,7 @@ Rectangle {
             }
             PropertyChanges {
                 target: barFillEnd
-                width:  barEndThickness * parent.width
+                width: barEndThickness * parent.width
                 height: barEndLength * parent.height
                 anchors.horizontalCenter: barFill.right
                 anchors.verticalCenter: undefined
@@ -149,6 +170,13 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.right: parent.right
                 anchors.left: undefined
+            }
+            AnchorChanges {
+                target: barFillEnd
+                anchors.bottom: undefined
+                anchors.top: parent.top
+                anchors.left: undefined
+                anchors.right: undefined
             }
             PropertyChanges {
                 target: barFill
@@ -193,13 +221,13 @@ Rectangle {
         //anchors.horizontalCenter: rpmBar.horizontal ? barFill.right : undefined
         // anchors.verticalCenter: rpmBar.horizontal ? undefined : barFill.top
         // horizontal bar, labels on top --> start from parent.bottom
-        anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
+        //anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
         // horizontal bar, labels on bottom --> start from parent.top
-        anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.top) : undefined
+        //anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.top) : undefined
         // vertical bar, labels on top (right) --> start from parent.left
-        anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.left : undefined)
+        //anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.left : undefined)
         // vertical bar, labels on bottom (left) --> start from parent.right
-        anchors.right: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? undefined : parent.right)
+        //anchors.right: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? undefined : parent.right)
         layer.enabled: true
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -211,22 +239,124 @@ Rectangle {
         model: Math.floor(rpmBar.maxValue / rpmBar.tickStep) + 1
         Rectangle {
             id: tickMark
+            states: [
+                State {
+                    name: "verticalLeft"
+                    when: !horizontal && !topLabels
+                    AnchorChanges {
+                        target: tickMark
+                        anchors.bottom: undefined
+                        anchors.top: undefined
+                        anchors.left: undefined
+                        anchors.right: parent.right
+                    }
+                    PropertyChanges {
+                        target: tickMark
+                        x: 0
+                        y: (1 - (index / (rpmBar.maxValue / rpmBar.tickStep))) * parent.height
+                    }
+                    AnchorChanges {
+                        target: tickLabel
+                        anchors.bottom: undefined
+                        anchors.top: undefined
+                        anchors.left: undefined
+                        anchors.right: parent.left
+                        anchors.horizontalCenter: undefined
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                },
+                State {
+                    name: "verticalRight"
+                    when: !horizontal && topLabels
+                    AnchorChanges {
+                        target: tickMark
+                        anchors.bottom: undefined
+                        anchors.top: undefined
+                        anchors.left: parent.left
+                        anchors.right: undefined
+                    }
+                    PropertyChanges {
+                        target: tickMark
+                        x: 0
+                        y: (1 - (index / (rpmBar.maxValue / rpmBar.tickStep))) * parent.height
+                    }
+                    AnchorChanges {
+                        target: tickLabel
+                        anchors.bottom: undefined
+                        anchors.top: undefined
+                        anchors.left: parent.right
+                        anchors.right: undefined
+                        anchors.horizontalCenter: undefined
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                },
+                State {
+                    name: "horizontalTop"
+                    when: horizontal && topLabels
+                    AnchorChanges {
+                        target: tickMark
+                        anchors.bottom: parent.bottom
+                        anchors.top: undefined
+                        anchors.left: undefined
+                        anchors.right: undefined
+                    }
+                    PropertyChanges {
+                        target: tickMark
+                        x: (index / (rpmBar.maxValue / rpmBar.tickStep)) * parent.width
+                        y: 0
+                    }
+                    AnchorChanges {
+                        target: tickLabel
+                        anchors.bottom: parent.top
+                        anchors.top: undefined
+                        anchors.left: undefined
+                        anchors.right: undefined
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: undefined
+                    }
+                },
+                State {
+                    name: "horizontalBottom"
+                    when: horizontal && !topLabels
+                    AnchorChanges {
+                        target: tickMark
+                        anchors.bottom: undefined
+                        anchors.top: parent.top
+                        anchors.left: undefined
+                        anchors.right: undefined
+                    }
+                    PropertyChanges {
+                        target: tickMark
+                        x: (index / (rpmBar.maxValue / rpmBar.tickStep)) * parent.width
+                        y: 0
+                    }
+                    AnchorChanges {
+                        target: tickLabel
+                        anchors.bottom: undefined
+                        anchors.top: parent.bottom
+                        anchors.left: undefined
+                        anchors.right: undefined
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: undefined
+                    }
+                }
+            ]
             // horizontal bar, labels on top --> start from parent.bottom
-            anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
+            //anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.bottom : undefined) : undefined
             // horizontal bar, labels on bottom --> start from parent.top
-            anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.top) : undefined
+            //anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.top) : undefined
             // vertical bar, labels on top (right) --> start from parent.left
-            anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.left : undefined)
+            //anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.left : undefined)
             // vertical bar, labels on bottom (left) --> start from parent.right
-            anchors.right: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? undefined : parent.right)
+            //anchors.right: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? undefined : parent.right)
             // different (inversed) width and heights of tick lines depending on if the bar is horizontal or vertical.
             width: rpmBar.horizontal ? (index % rpmBar.bigTickEvery === 0 ? barEndThickness * parent.width : 1) : (index % rpmBar.bigTickEvery === 0 ? 1.25 : 0.25) * parent.width
             height: rpmBar.horizontal ? (index % rpmBar.bigTickEvery === 0 ? 1.25 : 0.25) * parent.height : (index % rpmBar.bigTickEvery === 0 ? 2 : 1)
             color: rpmBar.tickColor
             // horizontal bars --> arrange ticks on the x axis
-            x: rpmBar.horizontal ? (index / (rpmBar.maxValue / rpmBar.tickStep)) * parent.width : 0
+            //x: rpmBar.horizontal ? (index / (rpmBar.maxValue / rpmBar.tickStep)) * parent.width : 0
             // vertical bars --> arrange ticks on the y axis
-            y: rpmBar.horizontal ? 0 : (1 - (index / (rpmBar.maxValue / rpmBar.tickStep))) * parent.height
+            //y: rpmBar.horizontal ? 0 : (1 - (index / (rpmBar.maxValue / rpmBar.tickStep))) * parent.height
             Text {
                 id: tickLabel
                 text: index * rpmBar.tickStep
@@ -235,16 +365,16 @@ Rectangle {
                 font.pixelSize: Math.min(rpmBar.width, rpmBar.height) * rpmBar.fontFactor
                 font.family: tickFontName
                 // horizontal bar, labels on top --> be above parent.top
-                anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.top : undefined) : undefined
+                //anchors.bottom: rpmBar.horizontal ? (rpmBar.topLabels ? parent.top : undefined) : undefined
                 // horizontal bar, labels on bottom --> be below parent.bottom
-                anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.bottom) : undefined
+                //anchors.top: rpmBar.horizontal ? (rpmBar.topLabels ? undefined : parent.bottom) : undefined
                 // Center text horizontally for a horizontal bar and vertically for a vertical bar
-                anchors.horizontalCenter: rpmBar.horizontal ? parent.horizontalCenter : undefined
-                anchors.verticalCenter: rpmBar.horizontal ? undefined : parent.verticalCenter
+                //anchors.horizontalCenter: rpmBar.horizontal ? parent.horizontalCenter : undefined
+                //anchors.verticalCenter: rpmBar.horizontal ? undefined : parent.verticalCenter
                 // vertical bar, labels on top (right) --> our left side should touch parent.right (by touching I mean anchored to)
-                anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.right : undefined)
+                //anchors.left: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? parent.right : undefined)
                 // vertical bar, labels on bottom (left) --> our right side should touch parent.left
-                anchors.right: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? undefined : parent.left)
+                //anchors.right: rpmBar.horizontal ? undefined : (rpmBar.topLabels ? undefined : parent.left)
             }
         }
     }
