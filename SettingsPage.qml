@@ -256,7 +256,7 @@ Item {
                     }
                     CheckBox {
                         id: multiShiftCheck
-                        text: "Always show client-side multicolored shift lights"
+                        text: "Only show client-side multicolor lights (or nothing if redline = -1)"
                         checked: AppSettings.enableClientLights
                         onCheckedChanged: {
                             AppSettings.enableClientLights = checked

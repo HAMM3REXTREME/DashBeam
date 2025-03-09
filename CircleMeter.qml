@@ -18,12 +18,14 @@ Item {
     property color backgroundColorInner: "#191919"
     property color backgroundColorOuter: "#292929"
     property color screenBackground: "#242426"
-    property color strokeColor: "#FFF4C9"
-    property color tickColor: "#FFF4C9"
+    property color strokeColor: "#f4f0e6"
+    property color tickColor: "#f4f0e6"
     property color tickColorRedline: "#FF0000"
-    property color labelFontColor: "#FFF4C9"
-    property color middleFontColor: "#FFF4C9"
+    property color labelFontColor: "#f4f0e6"
+    property color middleFontColor: "#f4f0e6"
     property color needleColor: "red"
+    property color arcColor: "#9F0A0A"
+    property color arcColorRedline: "#bf0909"
     property real needleValue: 0
     property real needleWidth: radius / 40
     property real startAngle: 180
@@ -95,16 +97,11 @@ Item {
         onPaint: {
             var ctx = getContext("2d")
             var endAngleRad = (needle.rotation - startAngle) * (Math.PI / 180)
-            // Define the gradient for the stroke
-            var strokeGradient = ctx.createLinearGradient(0, 0, width, height)
-            strokeGradient.addColorStop(0, "#ff0000") // Redline end
-            strokeGradient.addColorStop(1, "#002929") // Idle end
-
             ctx.clearRect(0, 0, width, height)
             ctx.beginPath()
             ctx.arc(width / 2, height / 2, 0.65 * radius, 0, endAngleRad)
             ctx.lineWidth = radius / 20
-            ctx.strokeStyle = strokeGradient
+            ctx.strokeStyle = needleValue >= redline ? arcColorRedline : arcColor
             ctx.stroke()
         }
     }
@@ -172,7 +169,7 @@ Item {
             } // Tip (of the needle)
             GradientStop {
                 position: 0.4
-                color: "#551010"
+                color: "#771010"
             } // Base
         }
         rotation: ((dial.needleValue - dial.tickStart) / dial.tickStep) * (360 / dial.tickDivide) + dial.startAngle

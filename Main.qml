@@ -82,10 +82,10 @@ ApplicationWindow {
             //     wrapMode: Text.Wrap
             //     horizontalAlignment: Text.AlignHCenter
             // }
-            GearText{
-                    id: gearText
-                    textBox: (carListener.vehicleGear - 1).toString()
-                }
+            GearText {
+                id: gearText
+                textBox: (carListener.vehicleGear - 1).toString()
+            }
             Text {
                 id: fuelText
                 anchors.left: parent.left
@@ -153,7 +153,7 @@ ApplicationWindow {
             needleValue: carListener.vehicleRpm / 1000
             labelFontSize: radius / 10
             tickFontName: uiFont.name
-            backgroundColorOuter: carListener.vehicleShowLights.includes("DL_SHIFT") ? "#492929" : "#292929"
+            backgroundColorOuter: "#292929"
             redline: AppSettings.vRedline > 0 ? AppSettings.vRedline / 1000 : 99999.9
             middleText: "<h1><b>" + carListener.vehicleRpm.toFixed() + "</b></h1>RPM"
             middleFontSize: radius / 8
@@ -194,17 +194,17 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: parent.height * 0.01
             needleValue: carListener.vehicleTurbo
-            tickStep: 0.1
-            tickCount: 41
-            tickDivide: 50
+            tickStep: 0.05
+            tickCount: 91
+            tickDivide: 100
             startAngle: 270
-            longTickLength: radius / 8
-            shortTickLength: radius / 12
-            labelSkipEvery: 5
+            longTickLength: radius / 12
+            shortTickLength: radius / 16
+            labelSkipEvery: 10
             longTickEvery: 5
             tickFontName: uiFont.name
             needleWidth: radius / 20
-            labelFontSize: radius / 8
+            labelFontSize: radius / 10
             middleText: "<h1><b>" + carListener.vehicleTurbo.toFixed(2) + "</b></h1>bar"
             middleFontSize: radius / 8
             middleFontName: circleFont.name
@@ -298,25 +298,29 @@ ApplicationWindow {
             shadeAll: AppSettings.shiftLightColorAll
         }
         SmoothRpmDisplay {
-            id: testDisp
-            opacity: 0.8
+            id: linearRpmDisp
             width: parent.width * 0.8
-            height: parent.height * 0.085
+            height: parent.height * 0.032
             tickFontName: uiFont.name
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.centerIn: parent
             value: carListener.vehicleRpm / 1000
             redlineValue: AppSettings.vRedline / 1000
+            visible: false
         }
-        Button {
-            text: "SmoothRpmDisplay test"
-            width: 200
-            height: 40
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            anchors.margins: 150
-            onClicked: testDisp.topLabels = !testDisp.topLabels
+        Rectangle {
+            width: parent.width * 0.85
+            height: parent.height * 0.1
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            opacity: 0
+            MouseArea {
+                id: shiftLightToggler
+                anchors.fill: parent
+                onClicked: {
+                    linearRpmDisp.visible = !linearRpmDisp.visible
+                }
+            }
         }
         Rectangle {
             id: pedalDisplay
