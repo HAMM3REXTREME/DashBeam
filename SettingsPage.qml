@@ -5,14 +5,13 @@ import QtQuick.Effects
 import QtQuick.Dialogs
 import QtQuick.Controls.Material
 
+// Must be loaded with Loader { id: settingsLoader }
 Item {
+    id: settingsPage
     visible: true
     width: 1280
     height: 720
     Material.theme: Material.Dark
-    property real clShiftPoint: settingsManager.loadSetting("shiftPoint", -1.0)
-    property int ogPort: settingsManager.loadSetting("ogPort", 4444)
-    property int numLeds: settingsManager.loadSetting("numLeds", 9)
     Rectangle {
         width: parent.width
         height: parent.height
@@ -23,7 +22,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             color: "#212121"
             width: parent.width
-            height: parent.height - 1.5*backButton.height
+            height: parent.height - 1.5 * backButton.height
             Flickable {
                 id: flickable
                 anchors.fill: parent
@@ -56,7 +55,7 @@ Item {
                     Row {
                         TextField {
                             id: portInput
-                            text: ogPort.toString()
+                            text: AppSettings.listenPort.toString()
                             placeholderText: "Port"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -80,14 +79,13 @@ Item {
                                 if (!(port && port > 0 && port <= 65535)) {
                                     console.log("Settings: Invalid port number.")
                                     return false
-                                } else if (port === ogPort) {
+                                } else if (port === AppSettings.listenPort) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                ogPort = parseInt(portInput.text)
-                                settingsManager.saveSetting("ogPort", ogPort)
+                                AppSettings.listenPort = parseInt(portInput.text)
                             }
                         }
                     }
@@ -99,7 +97,7 @@ Item {
                     Row {
                         TextField {
                             id: inputShiftPoint
-                            text: clShiftPoint.toString()
+                            text: AppSettings.vRedline.toString()
                             placeholderText: "RPM"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -123,27 +121,25 @@ Item {
                                 if (!isFinite(newShift)) {
                                     console.log("Settings: Invalid redline value.")
                                     return false
-                                } else if (newShift === clShiftPoint) {
+                                } else if (newShift === AppSettings.vRedline) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                clShiftPoint = parseFloat(inputShiftPoint.text)
-                                settingsManager.saveSetting("shiftPoint",
-                                                            clShiftPoint)
+                                AppSettings.vRedline = parseFloat(inputShiftPoint.text)
                             }
                         }
                     }
                     Text {
-                        text: "Number of LEDs on shifter"
+                        text: "Number of LEDs on shift bar"
                         color: "white"
                         font.pixelSize: 16
                     }
                     Row {
                         TextField {
                             id: inputNumleds
-                            text: numLeds.toString()
+                            text: AppSettings.shiftLightCount.toString()
                             placeholderText: "LEDs"
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             width: 100
@@ -164,19 +160,93 @@ Item {
                             height: 40
                             enabled: {
                                 var newLeds = parseInt(inputNumleds.text)
-                                if (newLeds < 1) {
+                                if (newLeds < 1 | newLeds > 512) {
                                     console.log("Settings: Invalid number of lights.")
                                     return false
-                                } else if (newLeds === numLeds) {
+                                } else if (newLeds === AppSettings.shiftLightCount) {
                                     return false
                                 }
                                 return true
                             }
                             onClicked: {
-                                numLeds = parseInt(inputNumleds.text)
-                                settingsManager.saveSetting("numLeds",
-                                                            numLeds)
+                                AppSettings.shiftLightCount = parseInt(inputNumleds.text)
                             }
+                        }
+                    }
+                    Text {
+                        text: "Shift Light LEDs aspect ratio"
+                        color: "white"
+                        font.pixelSize: 16
+                    }
+                    Row {
+                        TextField {
+                            id: inputLightAspect
+                            text: AppSettings.shiftLightAspect.toString()
+                            placeholderText: "Ratio"
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            width: 100
+                            height: 40
+                            color: "#FFFFFF"
+                            placeholderTextColor: "#A0A0A0"
+                            background: Rectangle {
+                                color: "#333333"
+                                radius: 10
+                                border.color: "#555555"
+                                border.width: 2
+                            }
+                        }
+                        RoundButton {
+                            text: "Set"
+                            width: 80
+                            radius: 10
+                            height: 40
+                            enabled: {
+                                var newAspect = parseFloat(inputLightAspect.text)
+                                if (!isFinite(newAspect)) {
+                                    console.log("Settings: Invalid shift light aspect value.")
+                                    return false
+                                } else if (newAspect === AppSettings.shiftLightAspect) {
+                                    return false
+                                }
+                                return true
+                            }
+                            onClicked: {
+                                AppSettings.shiftLightAspect = parseFloat(inputLightAspect.text)
+                            }
+                        }
+                    }
+                    ColorDialog {
+                        id: colorDialog
+                        selectedColor: AppSettings.shiftLightColorAll
+                        onAccepted: {
+                            AppSettings.shiftLightColorAll = selectedColor
+                        }
+                    }
+                    ShiftLights {
+                        height: 0.025 * settingsPage.height
+                        width: 0.025 * numLeds * parent.width * lightAspect
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        shiftSingleOn: !AppSettings.enableClientLights
+                        maxShiftPoint: AppSettings.vRedline
+                        vehicleRpm: dummyRpmSlide.value
+                        numLeds: AppSettings.shiftLightCount
+                        shadeAll: AppSettings.shiftLightColorAll
+                        lightAspect: AppSettings.shiftLightAspect
+                    }
+                    Slider {
+                        id: dummyRpmSlide
+                        from: 0
+                        value: AppSettings.vRedline
+                        to: AppSettings.vRedline
+                    }
+                    RoundButton {
+                        text: "Change shift point color"
+                        width: 200
+                        radius: 10
+                        height: 40
+                        enabled: true
+                        onClicked: {
+                            colorDialog.open()
                         }
                     }
                     Text {
@@ -186,11 +256,10 @@ Item {
                     }
                     CheckBox {
                         id: multiShiftCheck
-                        text: "Always show client-side multicolored shift lights"
-                        checked: settingsManager.loadSetting("isShift", false)
+                        text: "Only show client-side multicolor lights (or nothing if redline = -1)"
+                        checked: AppSettings.enableClientLights
                         onCheckedChanged: {
-                            settingsManager.saveSetting("isShift", checked)
-                                                        console.log(settingsManager.loadSetting("isShift", false))
+                            AppSettings.enableClientLights = checked
                         }
                     }
                     Text {
@@ -198,28 +267,30 @@ Item {
                         color: "white"
                         font.pixelSize: 24
                     }
+                    Text {
+                        text: "All IP addresses for this device. Use the correct one (accessible on your local network) in BeamNG settings."
+                        color: "white"
+                        font.pixelSize: 16
+                    }
                     Rectangle {
                         id: ipBox
-                        width: ipText.implicitWidth + 20
-                        height: ipText.implicitHeight + 20
+                        width: ipText.implicitWidth + 30
+                        height: ipText.implicitHeight + 30
                         color: "#333333"
                         radius: 10
                         border.color: "#555555"
                         border.width: 2
 
-                        Text {
-                            id: ipText
-                            visible: false
-                            anchors.centerIn: parent
-                            anchors.margins: 10
-                            font.pixelSize: 24
-                            font.family: "monospace"
-                            text: (networkInfo ? networkInfo.ipAddresses : "Can't find IP addresses")
-                            wrapMode: TextArea.Wrap
-                            color: "#FFFFFF"
+                        MouseArea {
+                            id: ipRevealer
+                            anchors.fill: parent
+                            onClicked: {
+                                ipText.visible = !ipText.visible
+                                ipTextHiddenMsg.visible = !ipTextHiddenMsg.visible
+                            }
                         }
                         Text {
-                            id: ipTextHider
+                            id: ipTextHiddenMsg
                             visible: true
                             anchors.centerIn: parent
                             anchors.margins: 10
@@ -228,19 +299,25 @@ Item {
                             wrapMode: TextArea.Wrap
                             color: "#FFFFFF"
                         }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                ipText.visible = !ipText.visible
-                                ipTextHider.visible = !ipTextHider.visible
-                            }
+                        TextEdit {
+                            id: ipText
+                            visible: false
+                            readOnly: true
+                            anchors.centerIn: parent
+                            anchors.margins: 10
+                            font.pixelSize: 20
+                            font.family: "monospace"
+                            text: (networkInfo ? networkInfo.ipAddresses : "Can't find IP addresses")
+                            wrapMode: TextArea.Wrap
+                            color: "#FFFFFF"
                         }
                     }
                     Text {
-                        text: "DashBeam alpha build"
+                        text: "DashBeam development preview"
                         color: "white"
                         font.pixelSize: 12
                     }
+                    // Add some scrollability
                     Item {
                         width: 1
                         height: flickable.height / 2 // Ensures smooth scrolling

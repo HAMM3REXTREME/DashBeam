@@ -14,22 +14,30 @@ qt_add_executable(DashBeamApp
     src/UdpListener.cpp
     src/NetInfo.h
     src/NetInfo.cpp
-    src/SettingsManager.h
-    src/SettingsManager.cpp
 
+
+
+)
+
+set_source_files_properties(AppSettings.qml PROPERTIES
+    QT_QML_SINGLETON_TYPE TRUE
 )
 
 qt_add_qml_module(DashBeamApp
     URI DashBeam
     VERSION 1.0
     QML_FILES Main.qml SettingsPage.qml
-    RESOURCES assets/Aldrich-Regular.ttf assets/signal_l.svg assets/signal_r.svg assets/highbeam.svg assets/handbrake.svg assets/screen_topleft.svg assets/JetBrainsMono-Bold.ttf
+    RESOURCES assets/Aldrich-Regular.ttf assets/signal_l.svg assets/signal_r.svg assets/highbeam.svg assets/handbrake.svg assets/screen_topleft.svg assets/JetBrainsMono-Bold.ttf assets/dashbeam.svg
     RESOURCES android/AndroidManifest.xml android/build.gradle android/res/values/libs.xml android/res/xml/qtprovider_paths.xml android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.properties android/gradle.properties android/gradlew android/gradlew.bat
     QML_FILES CircleMeter.qml
     QML_FILES ShiftLights.qml
     QML_FILES ColorBar.qml
+    QML_FILES AppSettings.qml
+    QML_FILES SmoothRpmDisplay.qml
+    QML_FILES GearText.qml
 
 )
+
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

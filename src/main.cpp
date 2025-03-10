@@ -3,7 +3,6 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "SettingsManager.h"
 #include "NetInfo.h"
 #include "UdpListener.h"
 
@@ -31,15 +30,15 @@ int main(int argc, char *argv[]) {
     dl_flags[1024] = "DL_ABS";        // abs active or switched off
     dl_flags[2048] = "DL_SPARE";      // N/A
 
-    SettingsManager settingsManager; // Persistent settings
-    UdpListener udpListener(4444, og_flags, dl_flags);     // Create the UdpListener for our outgauge packets
+    outGaugeListener carListener(4444, og_flags, dl_flags);     // Create the UdpListener for our outgauge packets
     NetworkInfo networkInfo; // Gets IP Addresses
 
     // Qt initialization
     QGuiApplication app(argc, argv);
+    app.setOrganizationName("hamm3r");
+    app.setApplicationName("DashBeam");
     QQmlApplicationEngine engine;
-    engine.rootContext()->setContextProperty("settingsManager", &settingsManager);
-    engine.rootContext()->setContextProperty("udpListener", &udpListener);
+    engine.rootContext()->setContextProperty("carListener", &carListener);
     engine.rootContext()->setContextProperty("networkInfo", &networkInfo);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);

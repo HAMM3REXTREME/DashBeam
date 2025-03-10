@@ -6,7 +6,7 @@
 #include <QHostAddress>
 #include <cstring>
 
-// Temporary structure to represent the OutGaugePacket
+// Temporary structure to represent the OutGauge Packet
 struct OutGaugePacket {
     uint32_t time;
     char name[4];
@@ -44,12 +44,12 @@ QStringList readFlags(int value, const QHash<int, QString>& flags) {
     return active_flags;
 }
 
-UdpListener::UdpListener(quint16 port, const QHash<int, QString>& ogFlags, const QHash<int, QString>& dlFlags, QObject* parent) : QObject(parent), m_socket(new QUdpSocket(this)), m_port(port), m_ogFlags(ogFlags), m_dlFlags(dlFlags) {
+outGaugeListener::outGaugeListener(quint16 port, const QHash<int, QString>& ogFlags, const QHash<int, QString>& dlFlags, QObject* parent) : QObject(parent), m_socket(new QUdpSocket(this)), m_port(port), m_ogFlags(ogFlags), m_dlFlags(dlFlags) {
     // Connect the socket to the readyRead signal to process datagrams
-    connect(m_socket, &QUdpSocket::readyRead, this, &UdpListener::processDatagrams);
+    connect(m_socket, &QUdpSocket::readyRead, this, &outGaugeListener::processDatagrams);
 }
 
-void UdpListener::start() {
+void outGaugeListener::start() {
     // Bind the socket to the provided port
     if (!m_socket->bind(QHostAddress::Any, m_port)) {
         qWarning() << "start(): Failed to bind UDP socket on port" << m_port;
@@ -58,7 +58,7 @@ void UdpListener::start() {
     }
 }
 
-void UdpListener::setPort(quint16 newPort) {
+void outGaugeListener::setPort(quint16 newPort) {
     if (m_socket->state() == QAbstractSocket::BoundState) {
         // If already listening on a port, stop first
         m_socket->close();
@@ -68,7 +68,7 @@ void UdpListener::setPort(quint16 newPort) {
     qDebug() << "setPort(): The port is now" << m_port << "- please call start()";
 }
 
-void UdpListener::stop() {
+void outGaugeListener::stop() {
     if (m_socket->state() == QAbstractSocket::BoundState) {
         // Close the socket if it is currently bound
         m_socket->close();
@@ -78,7 +78,7 @@ void UdpListener::stop() {
     }
 }
 
-void UdpListener::processDatagrams() {
+void outGaugeListener::processDatagrams() {
     while (m_socket->hasPendingDatagrams()) {
         QByteArray datagram;
         datagram.resize(int(m_socket->pendingDatagramSize()));
@@ -94,26 +94,22 @@ void UdpListener::processDatagrams() {
             OutGaugePacket packet;
             // Copy the received datagram into the OutGaugePacket struct
             std::memcpy(&packet, datagram.data(), sizeof(OutGaugePacket));
-            // Create a QVariantMap to hold the parsed data so we can access it via QML
-            QVariantMap data;
-            data["flags"] = readFlags(packet.flags, m_ogFlags);
-            data["gear"] = packet.gear; // Reverse:0, Neutral:1, First:2...
-            data["speed"] = packet.speed; // M/S
-            data["rpm"] = packet.rpm;
-            data["turbo"] = packet.turbo; // BAR
-            data["engTemp"] = packet.engTemp;
-            data["fuel"] = packet.fuel;
-            data["oilTemp"] = packet.oilTemp;
-            data["dashLights"] = readFlags(packet.dashLights, m_dlFlags); // ALL dash lights
-            data["showLights"] = readFlags(packet.showLights, m_dlFlags); // SHOWN dash lights
-            data["throttle"] = packet.throttle;
-            data["brake"] = packet.brake;
-            data["clutch"] = packet.clutch;
-            data["id"] = packet.id;
+            m_flags = readFlags(packet.flags, m_ogFlags);
+            m_gear = packet.gear; // Reverse:0, Neutral:1, First:2...
+            m_speed = packet.speed; // M/S
+            m_rpm = packet.rpm;
+            m_turbo = packet.turbo; // BAR
+            m_engTemp = packet.engTemp;
+            m_fuel = packet.fuel;
+            m_oilTemp = packet.oilTemp;
+            m_dashLights = readFlags(packet.dashLights, m_dlFlags); // ALL dash lights
+            m_showLights = readFlags(packet.showLights, m_dlFlags); // SHOWN dash lights
+            m_throttle = packet.throttle;
+            m_brake = packet.brake;
+            m_clutch = packet.clutch;
+            m_id = packet.id;
 
-
-            // Emit the signal with the QVariantMap containing the data
-            emit outGaugeUpdated(data);
+            emit outGaugeUpdated();
         } else {
             qWarning() << "Received datagram of unexpected size:" << datagram.size();
         }
